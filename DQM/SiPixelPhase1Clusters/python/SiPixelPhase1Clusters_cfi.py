@@ -253,9 +253,9 @@ SiPixelPhase1ClustersConf = cms.VPSet(
 
 ## Uncomment to add trigger event flag settings
 import DQM.SiPixelPhase1Common.TriggerEventFlag_cfi as triggerflag
-SiPixelPhase1ClustersTriggers = cms.VPSet(
-#   triggerflag.genericTriggerEventFlag4HLTdb,
-#   triggerflag.genericTriggerEventFlag4L1bd,
+SiPixelPhase1ClustersTriggers = cms.untracked.VPSet(
+  triggerflag.genericTriggerEventFlag4HLTdb,
+  triggerflag.genericTriggerEventFlag4L1bd
 )
 
 SiPixelPhase1ClustersAnalyzer = cms.EDAnalyzer("SiPixelPhase1Clusters",
@@ -263,7 +263,7 @@ SiPixelPhase1ClustersAnalyzer = cms.EDAnalyzer("SiPixelPhase1Clusters",
         stripSrc = cms.InputTag("siStripClusters"),
         histograms = SiPixelPhase1ClustersConf,
         geometry = SiPixelPhase1Geometry,
-        triggerflag = SiPixelPhase1ClustersTriggers,
+        triggerflags = SiPixelPhase1ClustersTriggers
 )
 
 SiPixelPhase1ClustersHarvester = DQMEDHarvester("SiPixelPhase1Harvester",

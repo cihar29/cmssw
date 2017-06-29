@@ -4,7 +4,7 @@ from Configuration.StandardSequences.Eras import eras
 
 process = cms.Process("PIXELDQMLIVE", eras.Run2_2017)
 
-live=True  #set to false for lxplus offline testing
+live=False  #set to false for lxplus offline testing
 offlineTesting=not live
 
 TAG ="PixelPhase1" 

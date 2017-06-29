@@ -52,6 +52,9 @@ SiPixelPhase1Base::checktrigger(
   // Always return true for MC
   if( !iEvent.isRealData() ) { return true; }
 
+  // Trigger List loaded incorrectly
+  if ( trgidx >= triggerlist.size() ) { cout << "Trigger index " << trgidx << " not found." << endl; return true; }
+
   // Always return true is flag is not on;
   if( !triggerlist.at(trgidx)->on() ) { return true; }
 

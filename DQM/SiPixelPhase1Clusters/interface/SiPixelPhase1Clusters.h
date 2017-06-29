@@ -32,10 +32,10 @@ class SiPixelPhase1Clusters : public SiPixelPhase1Base {
   };
   // Uncomment to add trigger event flag enumerators
   // Make sure enum corresponds correctly with flags defined in _cfi.py file
-  // enum {
-  //   FLAG_HLT,
-  //   FLAG_L1,
-  // }
+  enum {
+     FLAG_HLT,
+     FLAG_L1
+  };
 
   public:
   explicit SiPixelPhase1Clusters(const edm::ParameterSet& conf);
@@ -45,5 +45,6 @@ class SiPixelPhase1Clusters : public SiPixelPhase1Base {
   edm::EDGetTokenT<edmNew::DetSetVector<SiPixelCluster> > pixelSrcToken_;
   edm::EDGetTokenT<edmNew::DetSetVector<SiStripCluster> > stripSrcToken_;
 };
+
 
 #endif

@@ -95,7 +95,7 @@ SiPixelPhase1RawDataConf = cms.VPSet(
 SiPixelPhase1RawDataAnalyzer = cms.EDAnalyzer("SiPixelPhase1RawData",
         src = cms.InputTag("siPixelDigis"),
         histograms = SiPixelPhase1RawDataConf,
-        geometry = SiPixelPhase1Geometry
+        geometry = SiPixelPhase1Geometry,
 )
 
 SiPixelPhase1RawDataHarvester = DQMEDHarvester("SiPixelPhase1Harvester",
