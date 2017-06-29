@@ -251,22 +251,34 @@ SiPixelPhase1ClustersConf = cms.VPSet(
   SiPixelPhase1ClustersPixelToStripRatio
 )
 
-## Uncomment to add trigger event flag settings
-import DQM.SiPixelPhase1Common.TriggerEventFlag_cfi as triggerflag
-SiPixelPhase1ClustersTriggers = cms.untracked.VPSet(
-  triggerflag.genericTriggerEventFlag4HLTdb,
-  triggerflag.genericTriggerEventFlag4L1bd
-)
-
 SiPixelPhase1ClustersAnalyzer = cms.EDAnalyzer("SiPixelPhase1Clusters",
         pixelSrc = cms.InputTag("siPixelClusters"),
         stripSrc = cms.InputTag("siStripClusters"),
         histograms = SiPixelPhase1ClustersConf,
         geometry = SiPixelPhase1Geometry,
-        triggerflags = SiPixelPhase1ClustersTriggers
 )
 
 SiPixelPhase1ClustersHarvester = DQMEDHarvester("SiPixelPhase1Harvester",
         histograms = SiPixelPhase1ClustersConf,
         geometry = SiPixelPhase1Geometry
+)
+
+#Trigger Analyzer
+import DQM.SiPixelPhase1Common.TriggerEventFlag_cfi as trigger
+
+SiPixelPhase1ClustersConfHLT = cms.VPSet()
+
+for i in range( 0, len(SiPixelPhase1ClustersConf) ):
+  histHLT = SiPixelPhase1ClustersConf[i].clone(
+                        topFolderName = cms.string( SiPixelPhase1ClustersConf[i].topFolderName.value() + trigger.HLTfoldername.value() )
+                      )
+  SiPixelPhase1ClustersConfHLT.append( histHLT )
+
+SiPixelPhase1ClustersAnalyzerHLT = SiPixelPhase1ClustersAnalyzer.clone(
+        histograms = SiPixelPhase1ClustersConfHLT,
+        triggerflags = trigger.SiPixelPhase1TriggerHLT
+)
+
+SiPixelPhase1ClustersHarvesterHLT = SiPixelPhase1ClustersHarvester.clone(
+        histograms = SiPixelPhase1ClustersConfHLT
 )

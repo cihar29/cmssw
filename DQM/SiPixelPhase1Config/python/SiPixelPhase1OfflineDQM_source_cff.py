@@ -24,7 +24,7 @@ PerModule.enabled = False
 
 siPixelPhase1OfflineDQM_source = cms.Sequence(SiPixelPhase1RawDataAnalyzer
                                             + SiPixelPhase1DigisAnalyzer
-                                            + SiPixelPhase1ClustersAnalyzer
+                                            + SiPixelPhase1ClustersAnalyzer + SiPixelPhase1ClustersAnalyzerHLT
                                             + SiPixelPhase1RecHitsAnalyzer
                                             + SiPixelPhase1TrackResidualsAnalyzer
                                             + SiPixelPhase1TrackClustersAnalyzer
