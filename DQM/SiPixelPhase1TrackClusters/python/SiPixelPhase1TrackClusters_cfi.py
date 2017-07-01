@@ -233,15 +233,58 @@ SiPixelPhase1TrackClustersConf = cms.VPSet(
   SiPixelPhase1TrackClustersNTracksInVolume,
 )
 
-
-SiPixelPhase1TrackClustersAnalyzer = cms.EDAnalyzer("SiPixelPhase1TrackClusters",
+SiPixelPhase1TrackClustersAnalyzerNoTrig = cms.EDAnalyzer("SiPixelPhase1TrackClusters",
         clusters = cms.InputTag("siPixelClusters"),
         tracks = cms.InputTag("generalTracks"),
         histograms = SiPixelPhase1TrackClustersConf,
         geometry = SiPixelPhase1Geometry
 )
 
-SiPixelPhase1TrackClustersHarvester = DQMEDHarvester("SiPixelPhase1Harvester",
+SiPixelPhase1TrackClustersHarvesterNoTrig = DQMEDHarvester("SiPixelPhase1Harvester",
         histograms = SiPixelPhase1TrackClustersConf,
         geometry = SiPixelPhase1Geometry
 )
+
+#Trigger Analyzer
+import DQM.SiPixelPhase1Common.TriggerEventFlag_cfi as trigger
+
+SiPixelPhase1TrackClustersConfHLT = cms.VPSet()
+SiPixelPhase1TrackClustersConfL1 = cms.VPSet()
+
+for i in range( 0, len(SiPixelPhase1TrackClustersConf) ):
+  histHLT = SiPixelPhase1TrackClustersConf[i].clone(
+              topFolderName = cms.string( SiPixelPhase1TrackClustersConf[i].topFolderName.value() + trigger.HLTfoldername.value() )
+            )
+  SiPixelPhase1TrackClustersConfHLT.append( histHLT )
+  histL1 = SiPixelPhase1TrackClustersConf[i].clone(
+              topFolderName = cms.string( SiPixelPhase1TrackClustersConf[i].topFolderName.value() + trigger.L1foldername.value() )
+            )
+  SiPixelPhase1TrackClustersConfL1.append( histL1 )
+
+SiPixelPhase1TrackClustersAnalyzerHLT = SiPixelPhase1TrackClustersAnalyzerNoTrig.clone(
+        histograms = SiPixelPhase1TrackClustersConfHLT,
+        triggerflags = trigger.SiPixelPhase1TriggerHLT
+)
+
+SiPixelPhase1TrackClustersHarvesterHLT = SiPixelPhase1TrackClustersHarvesterNoTrig.clone(
+        histograms = SiPixelPhase1TrackClustersConfHLT
+)
+
+SiPixelPhase1TrackClustersAnalyzerL1 = SiPixelPhase1TrackClustersAnalyzerNoTrig.clone(
+        histograms = SiPixelPhase1TrackClustersConfL1,
+        triggerflags = trigger.SiPixelPhase1TriggerL1
+)
+
+SiPixelPhase1TrackClustersHarvesterL1 = SiPixelPhase1TrackClustersHarvesterNoTrig.clone(
+        histograms = SiPixelPhase1TrackClustersConfL1
+)
+
+SiPixelPhase1TrackClustersAnalyzer = cms.Sequence(  SiPixelPhase1TrackClustersAnalyzerNoTrig
+                                                  * SiPixelPhase1TrackClustersAnalyzerHLT
+                                                  * SiPixelPhase1TrackClustersAnalyzerL1
+                                                 )
+
+SiPixelPhase1TrackClustersHarvester = cms.Sequence(  SiPixelPhase1TrackClustersHarvesterNoTrig
+       	          	       	       	       	   * SiPixelPhase1TrackClustersHarvesterHLT
+                                                   * SiPixelPhase1TrackClustersHarvesterL1
+       	       	       	       	 	          )

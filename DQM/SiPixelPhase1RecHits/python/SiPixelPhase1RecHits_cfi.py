@@ -90,15 +90,58 @@ SiPixelPhase1RecHitsConf = cms.VPSet(
   SiPixelPhase1RecHitsProb,
 )
 
-SiPixelPhase1RecHitsAnalyzer = cms.EDAnalyzer("SiPixelPhase1RecHits",
+SiPixelPhase1RecHitsAnalyzerNoTrig = cms.EDAnalyzer("SiPixelPhase1RecHits",
         src = cms.InputTag("generalTracks"),
         histograms = SiPixelPhase1RecHitsConf,
         geometry = SiPixelPhase1Geometry,
         onlyValidHits = cms.bool(False)
-
 )
 
-SiPixelPhase1RecHitsHarvester = DQMEDHarvester("SiPixelPhase1Harvester",
+SiPixelPhase1RecHitsHarvesterNoTrig = DQMEDHarvester("SiPixelPhase1Harvester",
         histograms = SiPixelPhase1RecHitsConf,
         geometry = SiPixelPhase1Geometry
 )
+
+#Trigger Analyzer
+import DQM.SiPixelPhase1Common.TriggerEventFlag_cfi as trigger
+
+SiPixelPhase1RecHitsConfHLT = cms.VPSet()
+SiPixelPhase1RecHitsConfL1 = cms.VPSet()
+
+for i in range( 0, len(SiPixelPhase1RecHitsConf) ):
+  histHLT = SiPixelPhase1RecHitsConf[i].clone(
+              topFolderName = cms.string( SiPixelPhase1RecHitsConf[i].topFolderName.value() + trigger.HLTfoldername.value() )
+            )
+  SiPixelPhase1RecHitsConfHLT.append( histHLT )
+  histL1 = SiPixelPhase1RecHitsConf[i].clone(
+              topFolderName = cms.string( SiPixelPhase1RecHitsConf[i].topFolderName.value() + trigger.L1foldername.value() )
+            )
+  SiPixelPhase1RecHitsConfL1.append( histL1 )
+
+SiPixelPhase1RecHitsAnalyzerHLT = SiPixelPhase1RecHitsAnalyzerNoTrig.clone(
+        histograms = SiPixelPhase1RecHitsConfHLT,
+        triggerflags = trigger.SiPixelPhase1TriggerHLT
+)
+
+SiPixelPhase1RecHitsHarvesterHLT = SiPixelPhase1RecHitsHarvesterNoTrig.clone(
+        histograms = SiPixelPhase1RecHitsConfHLT
+)
+
+SiPixelPhase1RecHitsAnalyzerL1 = SiPixelPhase1RecHitsAnalyzerNoTrig.clone(
+        histograms = SiPixelPhase1RecHitsConfL1,
+        triggerflags = trigger.SiPixelPhase1TriggerL1
+)
+
+SiPixelPhase1RecHitsHarvesterL1 = SiPixelPhase1RecHitsHarvesterNoTrig.clone(
+        histograms = SiPixelPhase1RecHitsConfL1
+)
+
+SiPixelPhase1RecHitsAnalyzer = cms.Sequence(  SiPixelPhase1RecHitsAnalyzerNoTrig
+                                            * SiPixelPhase1RecHitsAnalyzerHLT
+                                            * SiPixelPhase1RecHitsAnalyzerL1
+                                           )
+
+SiPixelPhase1RecHitsHarvester = cms.Sequence(  SiPixelPhase1RecHitsHarvesterNoTrig
+       	     	       	       	             * SiPixelPhase1RecHitsHarvesterHLT
+                                             * SiPixelPhase1RecHitsHarvesterL1
+       	      	       	       		    )

@@ -28,7 +28,7 @@ SiPixelPhase1Clusters::SiPixelPhase1Clusters(const edm::ParameterSet& iConfig) :
 
 void SiPixelPhase1Clusters::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
 
-  if( !checktrigger(iEvent,iSetup,TRIG0) ) { cout << "Event " << iEvent.id().event() << " failed trigger" << endl; return; }
+  if( !checktrigger(iEvent,iSetup,TRIG0) ) return;
 
   edm::Handle<edmNew::DetSetVector<SiPixelCluster>> inputPixel;
   iEvent.getByToken(pixelSrcToken_, inputPixel);

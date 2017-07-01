@@ -57,7 +57,8 @@ class SiPixelPhase1Base : public DQMEDAnalyzer, public HistogramManagerHolder {
   bool checktrigger( const edm::Event& iEvent, const edm::EventSetup& iSetup, const unsigned trgidx ) const;
 
   enum {
-    TRIG0
+    TRIG0,
+    TRIG1 //in case you want to use two triggers at once
   };
 
   private:

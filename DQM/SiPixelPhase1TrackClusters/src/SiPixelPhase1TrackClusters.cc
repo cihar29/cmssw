@@ -32,6 +32,8 @@ SiPixelPhase1TrackClusters::SiPixelPhase1TrackClusters(const edm::ParameterSet& 
 
 void SiPixelPhase1TrackClusters::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
 
+  if( !checktrigger(iEvent,iSetup,TRIG0) ) return;
+
   // get geometry
   edm::ESHandle<TrackerGeometry> tracker;
   iSetup.get<TrackerDigiGeometryRecord>().get(tracker);
