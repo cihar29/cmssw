@@ -39,6 +39,7 @@
 
 #include "DQMServices/Core/interface/MonitorElement.h"
 
+#include <fstream>
 #include <boost/cstdint.hpp>
 
  class SiPixelPhase1Summary : public DQMEDHarvester {
@@ -62,7 +63,7 @@
        bool runOnEndJob_;
 
     private:
-       enum trendPlots { offline,fpix,bpix };
+       enum trendPlots { offline,fpix,bpix,layer1,layer2,layer3,layer4,ring1,ring2 };
        edm::ParameterSet conf_;
        edm::InputTag src_;
        bool firstLumi;
@@ -75,6 +76,9 @@
        //The dead and innefficient roc trend plot
        std::map<trendPlots,MonitorElement*>  deadROCTrends_;
        std::map<trendPlots,MonitorElement*> ineffROCTrends_;
+
+       //Dead rocs log
+       std::ofstream deadROCsFile_;
 
        //book the summary plots
        void bookSummaries(DQMStore::IBooker & iBooker);
