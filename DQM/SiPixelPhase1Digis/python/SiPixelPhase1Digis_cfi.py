@@ -188,13 +188,57 @@ SiPixelPhase1DigisConf = cms.VPSet(
   SiPixelPhase1DigisOccupancy,
 )
 
-SiPixelPhase1DigisAnalyzer = cms.EDAnalyzer("SiPixelPhase1Digis",
-        src = cms.InputTag("siPixelDigis"), 
+SiPixelPhase1DigisAnalyzerNoTrig = cms.EDAnalyzer("SiPixelPhase1Digis",
+        src = cms.InputTag("siPixelDigis"),
         histograms = SiPixelPhase1DigisConf,
         geometry = SiPixelPhase1Geometry
 )
 
-SiPixelPhase1DigisHarvester = DQMEDHarvester("SiPixelPhase1Harvester",
+SiPixelPhase1DigisHarvesterNoTrig = DQMEDHarvester("SiPixelPhase1Harvester",
         histograms = SiPixelPhase1DigisConf,
         geometry = SiPixelPhase1Geometry
 )
+
+#Trigger Analyzer
+import DQM.SiPixelPhase1Common.TriggerEventFlag_cfi as trigger
+
+SiPixelPhase1DigisConfHLT = cms.VPSet()
+SiPixelPhase1DigisConfL1 = cms.VPSet()
+
+for i in range( 0, len(SiPixelPhase1DigisConf) ):
+  histHLT = SiPixelPhase1DigisConf[i].clone(
+              topFolderName = cms.string( SiPixelPhase1DigisConf[i].topFolderName.value() + trigger.HLTfoldername.value() )
+            )
+  SiPixelPhase1DigisConfHLT.append( histHLT )
+  histL1 = SiPixelPhase1DigisConf[i].clone(
+              topFolderName = cms.string( SiPixelPhase1DigisConf[i].topFolderName.value() + trigger.L1foldername.value() )
+            )
+  SiPixelPhase1DigisConfL1.append( histL1 )
+
+SiPixelPhase1DigisAnalyzerHLT = SiPixelPhase1DigisAnalyzerNoTrig.clone(
+        histograms = SiPixelPhase1DigisConfHLT,
+        triggerflags = trigger.SiPixelPhase1TriggerHLT
+)
+
+SiPixelPhase1DigisHarvesterHLT = SiPixelPhase1DigisHarvesterNoTrig.clone(
+        histograms = SiPixelPhase1DigisConfHLT
+)
+
+SiPixelPhase1DigisAnalyzerL1 = SiPixelPhase1DigisAnalyzerNoTrig.clone(
+        histograms = SiPixelPhase1DigisConfL1,
+        triggerflags = trigger.SiPixelPhase1TriggerL1
+)
+
+SiPixelPhase1DigisHarvesterL1 = SiPixelPhase1DigisHarvesterNoTrig.clone(
+        histograms = SiPixelPhase1DigisConfL1
+)
+
+SiPixelPhase1DigisAnalyzer = cms.Sequence(  SiPixelPhase1DigisAnalyzerNoTrig
+                                          * SiPixelPhase1DigisAnalyzerHLT
+                                          * SiPixelPhase1DigisAnalyzerL1
+                                         )
+
+SiPixelPhase1DigisHarvester = cms.Sequence(  SiPixelPhase1DigisHarvesterNoTrig
+       	       	       	       	           * SiPixelPhase1DigisHarvesterHLT
+                                           * SiPixelPhase1DigisHarvesterL1
+       	       	                 	  )

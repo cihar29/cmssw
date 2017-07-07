@@ -32,6 +32,8 @@ SiPixelPhase1TrackEfficiency::SiPixelPhase1TrackEfficiency(const edm::ParameterS
 
 void SiPixelPhase1TrackEfficiency::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
 
+  if( !checktrigger(iEvent,iSetup,TRIG0) ) return;
+
   // get geometry
   edm::ESHandle<TrackerGeometry> tracker;
   iSetup.get<TrackerDigiGeometryRecord>().get(tracker);

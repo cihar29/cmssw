@@ -49,8 +49,13 @@ SiPixelPhase1Base::checktrigger(
   const edm::EventSetup& iSetup,
   const unsigned         trgidx ) const
 {
+  //no triggers loaded
+  if (triggerlist.size() == 0) return true;
+
   // Always return true for MC
   if( !iEvent.isRealData() ) { return true; }
+
+  if ( trgidx >= triggerlist.size() ) { cout << "Trigger index " << trgidx << " not found." << endl; return true; }
 
   // Always return true is flag is not on;
   if( !triggerlist.at(trgidx)->on() ) { return true; }

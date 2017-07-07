@@ -38,6 +38,8 @@ SiPixelPhase1TrackClusters::SiPixelPhase1TrackClusters(const edm::ParameterSet& 
 
 void SiPixelPhase1TrackClusters::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
 
+  if( !checktrigger(iEvent,iSetup,TRIG0) ) return;
+
   if (! (histo.size() > ONTRACK_SIZE_VS_ETA)) return;
 
   // get geometry

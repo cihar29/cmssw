@@ -39,6 +39,7 @@
 
 #include "DQMServices/Core/interface/MonitorElement.h"
 
+#include <fstream>
 #include <boost/cstdint.hpp>
 
  class SiPixelPhase1Summary : public DQMEDHarvester {
@@ -75,6 +76,9 @@
        //The dead and innefficient roc trend plot
        std::map<trendPlots,MonitorElement*>  deadROCTrends_;
        std::map<trendPlots,MonitorElement*> ineffROCTrends_;
+
+       //Dead rocs log
+       std::ofstream deadROCsFile_;
 
        //book the summary plots
        void bookSummaries(DQMStore::IBooker & iBooker);

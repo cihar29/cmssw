@@ -63,6 +63,8 @@ SiPixelPhase1Summary::SiPixelPhase1Summary(const edm::ParameterSet& iConfig) :
      summaryPlotName_[mapPSet.getParameter<std::string>("MapName")] = mapPSet.getParameter<std::string>("MapHist");
    }
 
+   deadROCsFile_.open ("deadROCs.txt");
+   deadROCsFile_ << "Dead ROCs" << endl;
 }
 
 SiPixelPhase1Summary::~SiPixelPhase1Summary()
@@ -70,6 +72,8 @@ SiPixelPhase1Summary::~SiPixelPhase1Summary()
    // do anything here that needs to be done at desctruction time
    // (e.g. close files, deallocate resources etc.)
   LogInfo ("PixelDQM") << "SiPixelPhase1Summary::~SiPixelPhase1Summary: Destructor"<<endl;
+
+  deadROCsFile_.close();
 }
 
 void SiPixelPhase1Summary::beginRun(edm::Run const& run, edm::EventSetup const& eSetup){
@@ -290,6 +294,11 @@ void SiPixelPhase1Summary::fillTrendPlots(DQMStore::IBooker & iBooker, DQMStore:
     for (int i=1; i<=tempLayerME->getTH1()->GetXaxis()->GetNbins(); i++){
       for (int j=1; j<=tempLayerME->getTH1()->GetYaxis()->GetNbins(); j++){
 	if (tempLayerME->getBinContent(i,j) > 0.) nFilledROCs[trendIt]++;
+        else {
+          deadROCsFile_ << "Lumi " << lumiSec << "  " << histName << "  ModuleCoord" << tempLayerME->getTH1()->GetXaxis()->GetBinCenter(i)
+                                                                  << "  LadderCoord" << tempLayerME->getTH1()->GetYaxis()->GetBinCenter(j)
+                                                                  << endl;
+        }
 	if (tempLayerME->getBinContent(i,j) > lowEffValue) hiEffROCs[trendIt]++;
       }
     }

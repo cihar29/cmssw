@@ -22,3 +22,20 @@ genericTriggerEventFlag4L1bd = cms.PSet(
    l1BeforeMask  = cms.bool( True ), # specifies, if the L1 algorithm decision should be read as before (true) or after (false) masking is applied.
    verbosityLevel = cms.uint32(1)
 )
+
+SiPixelPhase1TriggerHLT = cms.untracked.VPSet(
+  genericTriggerEventFlag4HLTdb
+)
+
+SiPixelPhase1TriggerL1 = cms.untracked.VPSet(
+  genericTriggerEventFlag4L1bd
+)
+
+SiPixelPhase1TriggerHLTL1 = cms.untracked.VPSet(
+  genericTriggerEventFlag4HLTdb,
+  genericTriggerEventFlag4L1bd
+)
+
+HLTfoldername = cms.string("/trigger_HLT")
+L1foldername = cms.string("/trigger_L1")
+HLTL1foldername = cms.string("/trigger_HLT_L1")
