@@ -82,8 +82,6 @@ SiPixelPhase1RawDataTypeNErrors = DefaultHisto.clone(
   )
 )
 
-
-
 SiPixelPhase1RawDataConf = cms.VPSet(
   SiPixelPhase1RawDataNErrors,
   SiPixelPhase1RawDataFIFOFull,
@@ -92,13 +90,57 @@ SiPixelPhase1RawDataConf = cms.VPSet(
   SiPixelPhase1RawDataTypeNErrors,
 )
 
-SiPixelPhase1RawDataAnalyzer = cms.EDAnalyzer("SiPixelPhase1RawData",
+SiPixelPhase1RawDataAnalyzerNoTrig = cms.EDAnalyzer("SiPixelPhase1RawData",
         src = cms.InputTag("siPixelDigis"),
         histograms = SiPixelPhase1RawDataConf,
         geometry = SiPixelPhase1Geometry
 )
 
-SiPixelPhase1RawDataHarvester = DQMEDHarvester("SiPixelPhase1Harvester",
+SiPixelPhase1RawDataHarvesterNoTrig = DQMEDHarvester("SiPixelPhase1Harvester",
         histograms = SiPixelPhase1RawDataConf,
         geometry = SiPixelPhase1Geometry
 )
+
+#Trigger Analyzer
+import DQM.SiPixelPhase1Common.TriggerEventFlag_cfi as trigger
+
+SiPixelPhase1RawDataConfHLT = cms.VPSet()
+SiPixelPhase1RawDataConfL1 = cms.VPSet()
+
+for i in range( 0, len(SiPixelPhase1RawDataConf) ):
+  histHLT = SiPixelPhase1RawDataConf[i].clone(
+              topFolderName = cms.string( SiPixelPhase1RawDataConf[i].topFolderName.value() + trigger.HLTfoldername.value() )
+            )
+  SiPixelPhase1RawDataConfHLT.append( histHLT )
+  histL1 = SiPixelPhase1RawDataConf[i].clone(
+              topFolderName = cms.string( SiPixelPhase1RawDataConf[i].topFolderName.value() + trigger.L1foldername.value() )
+            )
+  SiPixelPhase1RawDataConfL1.append( histL1 )
+
+SiPixelPhase1RawDataAnalyzerHLT = SiPixelPhase1RawDataAnalyzerNoTrig.clone(
+        histograms = SiPixelPhase1RawDataConfHLT,
+        triggerflags = trigger.SiPixelPhase1TriggerHLT
+)
+
+SiPixelPhase1RawDataHarvesterHLT = SiPixelPhase1RawDataHarvesterNoTrig.clone(
+        histograms = SiPixelPhase1RawDataConfHLT
+)
+
+SiPixelPhase1RawDataAnalyzerL1 = SiPixelPhase1RawDataAnalyzerNoTrig.clone(
+        histograms = SiPixelPhase1RawDataConfL1,
+        triggerflags = trigger.SiPixelPhase1TriggerL1
+)
+
+SiPixelPhase1RawDataHarvesterL1 = SiPixelPhase1RawDataHarvesterNoTrig.clone(
+        histograms = SiPixelPhase1RawDataConfL1
+)
+
+SiPixelPhase1RawDataAnalyzer = cms.Sequence( SiPixelPhase1RawDataAnalyzerNoTrig
+                                           * SiPixelPhase1RawDataAnalyzerHLT
+                                           * SiPixelPhase1RawDataAnalyzerL1
+                                           )
+
+SiPixelPhase1RawDataHarvester = cms.Sequence( SiPixelPhase1RawDataHarvesterNoTrig
+       	       	       	       	       	    * SiPixelPhase1RawDataHarvesterHLT
+                                            * SiPixelPhase1RawDataHarvesterL1
+       	       	       	       	 	    )

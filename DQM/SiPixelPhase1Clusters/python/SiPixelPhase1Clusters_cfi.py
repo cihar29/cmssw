@@ -20,7 +20,7 @@ SiPixelPhase1ClustersCharge = DefaultHistoDigiCluster.clone(
 SiPixelPhase1ClustersSize = DefaultHistoDigiCluster.clone(
   name = "size",
   title = "Total Cluster Size",
-  range_min = 0, range_max = 50, range_nbins = 50,
+  range_min = 0, range_max = 30, range_nbins = 30,
   xlabel = "size[pixels]",
   specs = VPSet(
     StandardSpecification2DProfile,
@@ -34,7 +34,7 @@ SiPixelPhase1ClustersSize = DefaultHistoDigiCluster.clone(
 SiPixelPhase1ClustersSizeX = DefaultHistoDigiCluster.clone(
   name = "sizeX",
   title = "Cluster Size in X",
-  range_min = 0, range_max = 50, range_nbins = 50,
+  range_min = 0, range_max = 30, range_nbins = 30,
   xlabel = "size[pixels]",
   specs = VPSet(
     #StandardSpecification2DProfile,
@@ -48,7 +48,7 @@ SiPixelPhase1ClustersSizeX = DefaultHistoDigiCluster.clone(
 SiPixelPhase1ClustersSizeY = DefaultHistoDigiCluster.clone(
   name = "sizeY",
   title = "Cluster Size in Y",
-  range_min = 0, range_max = 50, range_nbins = 50,
+  range_min = 0, range_max = 30, range_nbins = 30,
   xlabel = "size[pixels]",
   specs = VPSet(
     #StandardSpecification2DProfile,
@@ -62,7 +62,7 @@ SiPixelPhase1ClustersSizeY = DefaultHistoDigiCluster.clone(
 SiPixelPhase1ClustersNClusters = DefaultHistoDigiCluster.clone(
   name = "clusters",
   title = "Clusters",
-  range_min = 0, range_max = 30, range_nbins = 30,
+  range_min = 0, range_max = 30, range_nbins = 60,
   xlabel = "clusters",
   dimensions = 0,
 
@@ -101,6 +101,7 @@ SiPixelPhase1ClustersEventrate = DefaultHistoDigiCluster.clone(
   title = "Number of Events with clusters",
   ylabel = "#Events",
   dimensions = 0,
+  enabled=False,
   specs = VPSet(
     Specification().groupBy("Lumisection")
                    .groupBy("", "EXTEND_X").save(),
@@ -171,6 +172,7 @@ SiPixelPhase1ClustersSizeVsEta = DefaultHistoDigiCluster.clone(
   range_y_min =  0, range_y_max = 40, range_y_nbins = 40,
   dimensions = 2,
   specs = VPSet(
+    Specification().groupBy("PXBarrel/PXLayer").save(),
     Specification().groupBy("PXBarrel").save()
   )
 )
@@ -250,22 +252,58 @@ SiPixelPhase1ClustersConf = cms.VPSet(
   SiPixelPhase1ClustersPixelToStripRatio
 )
 
-## Uncomment to add trigger event flag settings
-import DQM.SiPixelPhase1Common.TriggerEventFlag_cfi as triggerflag
-SiPixelPhase1ClustersTriggers = cms.VPSet(
-#   triggerflag.genericTriggerEventFlag4HLTdb,
-#   triggerflag.genericTriggerEventFlag4L1bd,
-)
-
-SiPixelPhase1ClustersAnalyzer = cms.EDAnalyzer("SiPixelPhase1Clusters",
+SiPixelPhase1ClustersAnalyzerNoTrig = cms.EDAnalyzer("SiPixelPhase1Clusters",
         pixelSrc = cms.InputTag("siPixelClusters"),
         stripSrc = cms.InputTag("siStripClusters"),
         histograms = SiPixelPhase1ClustersConf,
-        geometry = SiPixelPhase1Geometry,
-        triggerflag = SiPixelPhase1ClustersTriggers,
+        geometry = SiPixelPhase1Geometry
 )
 
-SiPixelPhase1ClustersHarvester = DQMEDHarvester("SiPixelPhase1Harvester",
+SiPixelPhase1ClustersHarvesterNoTrig = DQMEDHarvester("SiPixelPhase1Harvester",
         histograms = SiPixelPhase1ClustersConf,
         geometry = SiPixelPhase1Geometry
 )
+
+#Trigger Analyzer
+import DQM.SiPixelPhase1Common.TriggerEventFlag_cfi as trigger
+
+SiPixelPhase1ClustersConfHLT = cms.VPSet()
+SiPixelPhase1ClustersConfL1 = cms.VPSet()
+
+for i in range( 0, len(SiPixelPhase1ClustersConf) ):
+  histHLT = SiPixelPhase1ClustersConf[i].clone(
+              topFolderName = cms.string( SiPixelPhase1ClustersConf[i].topFolderName.value() + trigger.HLTfoldername.value() )
+            )
+  SiPixelPhase1ClustersConfHLT.append( histHLT )
+  histL1 = SiPixelPhase1ClustersConf[i].clone(
+              topFolderName = cms.string( SiPixelPhase1ClustersConf[i].topFolderName.value() + trigger.L1foldername.value() )
+            )
+  SiPixelPhase1ClustersConfL1.append( histL1 )
+
+SiPixelPhase1ClustersAnalyzerHLT = SiPixelPhase1ClustersAnalyzerNoTrig.clone(
+        histograms = SiPixelPhase1ClustersConfHLT,
+        triggerflags = trigger.SiPixelPhase1TriggerHLT
+)
+
+SiPixelPhase1ClustersHarvesterHLT = SiPixelPhase1ClustersHarvesterNoTrig.clone(
+        histograms = SiPixelPhase1ClustersConfHLT
+)
+
+SiPixelPhase1ClustersAnalyzerL1 = SiPixelPhase1ClustersAnalyzerNoTrig.clone(
+        histograms = SiPixelPhase1ClustersConfL1,
+        triggerflags = trigger.SiPixelPhase1TriggerL1
+)
+
+SiPixelPhase1ClustersHarvesterL1 = SiPixelPhase1ClustersHarvesterNoTrig.clone(
+        histograms = SiPixelPhase1ClustersConfL1
+)
+
+SiPixelPhase1ClustersAnalyzer = cms.Sequence(  SiPixelPhase1ClustersAnalyzerNoTrig
+                                             * SiPixelPhase1ClustersAnalyzerHLT
+                                             * SiPixelPhase1ClustersAnalyzerL1
+                                            )
+
+SiPixelPhase1ClustersHarvester = cms.Sequence(  SiPixelPhase1ClustersHarvesterNoTrig
+       	       	       	       	       	      * SiPixelPhase1ClustersHarvesterHLT
+                                              * SiPixelPhase1ClustersHarvesterL1
+       	       	       	       	 	     )

@@ -9,8 +9,8 @@ SiPixelPhase1DigisADC = DefaultHistoDigiCluster.clone(
   title = "Digi ADC values",
   xlabel = "adc readout",
   range_min = -0.5,
-  range_max = 300.5,
-  range_nbins = 301,
+  range_max = 255.5,
+  range_nbins = 32,
   specs = VPSet(
     StandardSpecificationTrend,
     StandardSpecificationTrend2D,
@@ -25,7 +25,7 @@ SiPixelPhase1DigisNdigis = DefaultHistoDigiCluster.clone(
   title = "Digis",
   xlabel = "digis",
   range_min = 0,
-  range_max = 100,
+  range_max = 200,
   range_nbins = 100,
   dimensions = 0, # this is a count
 
@@ -63,14 +63,15 @@ SiPixelPhase1DigisNdigisPerFED = DefaultHisto.clone( #to be removed?
   title = "Digis",   # should allow setting the range per spec, but OTOH a 
   xlabel = "digis",  # HistogramManager is almost free.
   range_min = 0,
-  range_max = 2000,
+  range_max = 4000,
   range_nbins = 200,
   dimensions = 0, 
   specs = VPSet(
     Specification().groupBy("FED/Event")
                    .reduce("COUNT")
                    .groupBy("FED")
-                   .groupBy("", "EXTEND_Y")
+                   .reduce("MEAN")
+                   .groupBy("", "EXTEND_X")
                    .save()
   )
 )
@@ -108,7 +109,9 @@ SiPixelPhase1DigisEvents = DefaultHistoDigiCluster.clone(
   ylabel = "#Events",
   dimensions = 0,
   specs = VPSet(
+
     Specification().groupBy("Lumisection")
+                   .reduce("MEAN")
                    .groupBy("", "EXTEND_X").save(),
     Specification().groupBy("BX")
                    .groupBy("", "EXTEND_X").save()
@@ -152,16 +155,21 @@ SiPixelPhase1DigisOccupancy = DefaultHistoReadout.clone(
   specs = VPSet(
     Specification(PerReadout).groupBy("PXBarrel/FED/Channel")
                              .groupBy("PXBarrel/FED", "EXTEND_X").save(),
-    Specification(PerReadout).groupBy("PXBarrel/FED/Channel/RocInLink")
-                             .groupBy("PXBarrel/FED/Channel", "EXTEND_Y")
-                             .groupBy("PXBarrel/FED", "EXTEND_X").save(),
+
+    #Specification(PerReadout).groupBy("PXBarrel/FED/Channel/RocInLink") #Deactivating 2D maps giving redundant information
+    #                         .groupBy("PXBarrel/FED/Channel", "EXTEND_Y")
+    #                         .groupBy("PXBarrel/FED", "EXTEND_X").save(),
+
     Specification(PerReadout).groupBy("PXForward/FED/Channel")
                              .groupBy("PXForward/FED", "EXTEND_X").save(),
-    Specification(PerReadout).groupBy("PXForward/FED/Channel/RocInLink")
-                             .groupBy("PXForward/FED/Channel", "EXTEND_Y")
-                             .groupBy("PXForward/FED", "EXTEND_X").save(),
+
+    #Specification(PerReadout).groupBy("PXForward/FED/Channel/RocInLink")
+    #                         .groupBy("PXForward/FED/Channel", "EXTEND_Y")
+    #                         .groupBy("PXForward/FED", "EXTEND_X").save(),
+
     Specification(PerReadout).groupBy("PXBarrel/FED")
                              .groupBy("PXBarrel", "EXTEND_X").save(),
+
     Specification(PerReadout).groupBy("PXForward/FED")
                              .groupBy("PXForward", "EXTEND_X").save(),
 
@@ -180,13 +188,57 @@ SiPixelPhase1DigisConf = cms.VPSet(
   SiPixelPhase1DigisOccupancy,
 )
 
-SiPixelPhase1DigisAnalyzer = cms.EDAnalyzer("SiPixelPhase1Digis",
-        src = cms.InputTag("siPixelDigis"), 
+SiPixelPhase1DigisAnalyzerNoTrig = cms.EDAnalyzer("SiPixelPhase1Digis",
+        src = cms.InputTag("siPixelDigis"),
         histograms = SiPixelPhase1DigisConf,
         geometry = SiPixelPhase1Geometry
 )
 
-SiPixelPhase1DigisHarvester = DQMEDHarvester("SiPixelPhase1Harvester",
+SiPixelPhase1DigisHarvesterNoTrig = DQMEDHarvester("SiPixelPhase1Harvester",
         histograms = SiPixelPhase1DigisConf,
         geometry = SiPixelPhase1Geometry
 )
+
+#Trigger Analyzer
+import DQM.SiPixelPhase1Common.TriggerEventFlag_cfi as trigger
+
+SiPixelPhase1DigisConfHLT = cms.VPSet()
+SiPixelPhase1DigisConfL1 = cms.VPSet()
+
+for i in range( 0, len(SiPixelPhase1DigisConf) ):
+  histHLT = SiPixelPhase1DigisConf[i].clone(
+              topFolderName = cms.string( SiPixelPhase1DigisConf[i].topFolderName.value() + trigger.HLTfoldername.value() )
+            )
+  SiPixelPhase1DigisConfHLT.append( histHLT )
+  histL1 = SiPixelPhase1DigisConf[i].clone(
+              topFolderName = cms.string( SiPixelPhase1DigisConf[i].topFolderName.value() + trigger.L1foldername.value() )
+            )
+  SiPixelPhase1DigisConfL1.append( histL1 )
+
+SiPixelPhase1DigisAnalyzerHLT = SiPixelPhase1DigisAnalyzerNoTrig.clone(
+        histograms = SiPixelPhase1DigisConfHLT,
+        triggerflags = trigger.SiPixelPhase1TriggerHLT
+)
+
+SiPixelPhase1DigisHarvesterHLT = SiPixelPhase1DigisHarvesterNoTrig.clone(
+        histograms = SiPixelPhase1DigisConfHLT
+)
+
+SiPixelPhase1DigisAnalyzerL1 = SiPixelPhase1DigisAnalyzerNoTrig.clone(
+        histograms = SiPixelPhase1DigisConfL1,
+        triggerflags = trigger.SiPixelPhase1TriggerL1
+)
+
+SiPixelPhase1DigisHarvesterL1 = SiPixelPhase1DigisHarvesterNoTrig.clone(
+        histograms = SiPixelPhase1DigisConfL1
+)
+
+SiPixelPhase1DigisAnalyzer = cms.Sequence(  SiPixelPhase1DigisAnalyzerNoTrig
+                                          * SiPixelPhase1DigisAnalyzerHLT
+                                          * SiPixelPhase1DigisAnalyzerL1
+                                         )
+
+SiPixelPhase1DigisHarvester = cms.Sequence(  SiPixelPhase1DigisHarvesterNoTrig
+       	       	       	       	           * SiPixelPhase1DigisHarvesterHLT
+                                           * SiPixelPhase1DigisHarvesterL1
+       	       	                 	  )

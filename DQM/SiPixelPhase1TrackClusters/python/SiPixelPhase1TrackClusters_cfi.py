@@ -12,31 +12,61 @@ SiPixelPhase1TrackClustersOnTrackCharge = DefaultHistoTrack.clone(
     Specification().groupBy("PXBarrel/PXLayer").saveAll(),
     Specification().groupBy("PXForward/PXDisk").saveAll(),
     StandardSpecification2DProfile,#what is below is only for the timing client
+
     Specification(OverlayCurvesForTiming).groupBy("PXBarrel/OnlineBlock")
          .groupBy("PXBarrel", "EXTEND_Y")
          .save(),
     Specification(OverlayCurvesForTiming).groupBy("PXForward/OnlineBlock")
           .groupBy("PXForward", "EXTEND_Y")
           .save(),
+    
+    Specification().groupBy("PXBarrel/PXLayer/Lumisection")
+                   .reduce("MEAN")
+                   .groupBy("PXBarrel/PXLayer", "EXTEND_X")
+                   .save(),
+
+    Specification().groupBy("PXForward/PXDisk/Lumisection")
+                   .reduce("MEAN")
+                   .groupBy("PXForward/PXDisk", "EXTEND_X")
+                   .save(),
+
+    Specification(PerLayer1D).groupBy("PXBarrel/Shell/PXLayer").save(),
+    Specification(PerLayer1D).groupBy("PXForward/HalfCylinder/PXRing/PXDisk").save(),
+
+    
     Specification(OverlayCurvesForTiming).groupBy("PXForward/PXDisk/OnlineBlock") # per-layer with history for online
-          .groupBy("PXForward/PXDisk", "EXTEND_Y")
-          .save(),
+                   .groupBy("PXForward/PXDisk", "EXTEND_Y")
+                   .save(),
     Specification(OverlayCurvesForTiming).groupBy("PXBarrel/PXLayer/OnlineBlock") # per-layer with history for online
-                                 .groupBy("PXBarrel/PXLayer", "EXTEND_Y")
-                                 .save()
+                   .groupBy("PXBarrel/PXLayer", "EXTEND_Y")
+                   .save()
   )
 )
 
 SiPixelPhase1TrackClustersOnTrackSize = DefaultHistoTrack.clone(
   name = "size",
   title = "Total Cluster Size (OnTrack)",
-  range_min = 0, range_max = 50, range_nbins = 50,
+  range_min = 0, range_max = 30, range_nbins = 30,
   xlabel = "size[pixels]",
 
   specs = VPSet(
     Specification().groupBy("PXBarrel/PXLayer").saveAll(),
     Specification().groupBy("PXForward/PXDisk").saveAll(),
-    StandardSpecification2DProfile
+    StandardSpecification2DProfile,
+
+    Specification().groupBy("PXBarrel/PXLayer/Lumisection")
+                   .reduce("MEAN")
+                   .groupBy("PXBarrel/PXLayer", "EXTEND_X")
+                   .save(),
+
+    Specification().groupBy("PXForward/PXDisk/Lumisection")
+                   .reduce("MEAN")
+                   .groupBy("PXForward/PXDisk", "EXTEND_X")
+                   .save(),
+
+    Specification(PerLayer1D).groupBy("PXBarrel/Shell/PXLayer").save(),
+    Specification(PerLayer1D).groupBy("PXForward/HalfCylinder/PXRing/PXDisk").save()
+
   )
 )
 
@@ -64,6 +94,7 @@ SiPixelPhase1TrackClustersOnTrackNClusters = DefaultHistoTrack.clone(
                              .reduce("COUNT")    
                              .groupBy("PXBarrel/PXLayer")
                              .save(nbins=100, xmin=0, xmax=20000),
+
     Specification().groupBy("PXForward/PXDisk/Event")
                              .reduce("COUNT")    
                              .groupBy("PXForward/PXDisk/")
@@ -73,14 +104,33 @@ SiPixelPhase1TrackClustersOnTrackNClusters = DefaultHistoTrack.clone(
                    .reduce("COUNT")
                    .groupBy("PXBarrel")
                    .save(nbins=150, xmin=0, xmax=30000),
+
     Specification().groupBy("PXForward/Event")
                    .reduce("COUNT")
                    .groupBy("PXForward")
                    .save(nbins=150, xmin=0, xmax=30000),
+
     Specification().groupBy("PXAll/Event")
                    .reduce("COUNT")
                    .groupBy("PXAll")
                    .save(nbins=150, xmin=0, xmax=30000),
+
+    Specification().groupBy("BX")
+                   .groupBy("", "EXTEND_X").save(),
+
+    Specification().groupBy("PXBarrel/PXLayer/Event")
+                   .reduce("COUNT")
+                   .groupBy("PXBarrel/PXLayer/Lumisection")
+                   .reduce("MEAN")
+                   .groupBy("PXBarrel/PXLayer","EXTEND_X")
+                   .save(),
+
+    Specification().groupBy("PXForward/PXDisk/Event")
+                   .reduce("COUNT")
+                   .groupBy("PXForward/PXDisk/Lumisection")
+                   .reduce("MEAN")
+                   .groupBy("PXForward/PXDisk","EXTEND_X")
+                   .save(),
 
     #below is for timing client
     Specification(OverlayCurvesForTiming).groupBy("DetId/Event")
@@ -88,11 +138,13 @@ SiPixelPhase1TrackClustersOnTrackNClusters = DefaultHistoTrack.clone(
                     .groupBy("PXForward/OnlineBlock")
                     .groupBy("PXForward", "EXTEND_Y")
                     .save(),
+
     Specification(OverlayCurvesForTiming).groupBy("DetId/Event")
                     .reduce("COUNT")
                     .groupBy("PXBarrel/OnlineBlock")
                     .groupBy("PXBarrel", "EXTEND_Y")
                     .save()
+   
   )
 )
 
@@ -164,6 +216,22 @@ SiPixelPhase1TrackClustersNTracksInVolume = DefaultHistoTrack.clone(
 
 )
 
+SiPixelPhase1ClustersSizeVsEtaOnTrack = DefaultHistoTrack.clone(
+  name = "sizeyvseta_on_track",
+  title = "Cluster Size along Beamline vs. Cluster position #eta (OnTrack)",
+  xlabel = "Cluster #eta",
+  ylabel = "length [pixels]",
+  range_min = -3.2, range_max  = 3.2, range_nbins   = 40,
+  range_y_min =  0, range_y_max = 40, range_y_nbins = 40,
+  dimensions = 2,
+  specs = VPSet(
+    Specification().groupBy("PXBarrel/PXLayer").save(),
+    Specification().groupBy("PXBarrel").save()
+  )
+)
+
+
+
 SiPixelPhase1TrackClustersConf = cms.VPSet(
   SiPixelPhase1TrackClustersOnTrackCharge,
   SiPixelPhase1TrackClustersOnTrackSize,
@@ -179,17 +247,61 @@ SiPixelPhase1TrackClustersConf = cms.VPSet(
 
   SiPixelPhase1TrackClustersNTracks,
   SiPixelPhase1TrackClustersNTracksInVolume,
+  SiPixelPhase1ClustersSizeVsEtaOnTrack
 )
 
-
-SiPixelPhase1TrackClustersAnalyzer = cms.EDAnalyzer("SiPixelPhase1TrackClusters",
+SiPixelPhase1TrackClustersAnalyzerNoTrig = cms.EDAnalyzer("SiPixelPhase1TrackClusters",
         clusters = cms.InputTag("siPixelClusters"),
         tracks = cms.InputTag("generalTracks"),
         histograms = SiPixelPhase1TrackClustersConf,
         geometry = SiPixelPhase1Geometry
 )
 
-SiPixelPhase1TrackClustersHarvester = DQMEDHarvester("SiPixelPhase1Harvester",
+SiPixelPhase1TrackClustersHarvesterNoTrig = DQMEDHarvester("SiPixelPhase1Harvester",
         histograms = SiPixelPhase1TrackClustersConf,
         geometry = SiPixelPhase1Geometry
 )
+
+#Trigger Analyzer
+import DQM.SiPixelPhase1Common.TriggerEventFlag_cfi as trigger
+
+SiPixelPhase1TrackClustersConfHLT = cms.VPSet()
+SiPixelPhase1TrackClustersConfL1 = cms.VPSet()
+
+for i in range( 0, len(SiPixelPhase1TrackClustersConf) ):
+  histHLT = SiPixelPhase1TrackClustersConf[i].clone(
+              topFolderName = cms.string( SiPixelPhase1TrackClustersConf[i].topFolderName.value() + trigger.HLTfoldername.value() )
+            )
+  SiPixelPhase1TrackClustersConfHLT.append( histHLT )
+  histL1 = SiPixelPhase1TrackClustersConf[i].clone(
+              topFolderName = cms.string( SiPixelPhase1TrackClustersConf[i].topFolderName.value() + trigger.L1foldername.value() )
+            )
+  SiPixelPhase1TrackClustersConfL1.append( histL1 )
+
+SiPixelPhase1TrackClustersAnalyzerHLT = SiPixelPhase1TrackClustersAnalyzerNoTrig.clone(
+        histograms = SiPixelPhase1TrackClustersConfHLT,
+        triggerflags = trigger.SiPixelPhase1TriggerHLT
+)
+
+SiPixelPhase1TrackClustersHarvesterHLT = SiPixelPhase1TrackClustersHarvesterNoTrig.clone(
+        histograms = SiPixelPhase1TrackClustersConfHLT
+)
+
+SiPixelPhase1TrackClustersAnalyzerL1 = SiPixelPhase1TrackClustersAnalyzerNoTrig.clone(
+        histograms = SiPixelPhase1TrackClustersConfL1,
+        triggerflags = trigger.SiPixelPhase1TriggerL1
+)
+
+SiPixelPhase1TrackClustersHarvesterL1 = SiPixelPhase1TrackClustersHarvesterNoTrig.clone(
+        histograms = SiPixelPhase1TrackClustersConfL1
+)
+
+SiPixelPhase1TrackClustersAnalyzer = cms.Sequence(  SiPixelPhase1TrackClustersAnalyzerNoTrig
+                                                  * SiPixelPhase1TrackClustersAnalyzerHLT
+                                                  * SiPixelPhase1TrackClustersAnalyzerL1
+                                                 )
+
+SiPixelPhase1TrackClustersHarvester = cms.Sequence(  SiPixelPhase1TrackClustersHarvesterNoTrig
+       	          	       	       	       	   * SiPixelPhase1TrackClustersHarvesterHLT
+                                                   * SiPixelPhase1TrackClustersHarvesterL1
+       	       	       	       	 	          )

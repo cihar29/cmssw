@@ -11,7 +11,7 @@ SiPixelPhase1TrackEfficiencyValid = DefaultHistoTrack.clone(
 
   specs = VPSet(
     StandardSpecifications1D_Num,
-    StandardSpecification2DOccupancy,
+    StandardSpecification2DProfile_Num,
 
     Specification().groupBy("PXBarrel/PXLayer/Event") #this will produce inclusive counts per Layer/Disk
                              .reduce("COUNT")    
@@ -32,7 +32,7 @@ SiPixelPhase1TrackEfficiencyMissing = DefaultHistoTrack.clone(
 
   specs = VPSet(
     StandardSpecifications1D_Num,
-    StandardSpecification2DOccupancy,
+    StandardSpecification2DProfile_Num,
 
     Specification().groupBy("PXBarrel/PXLayer/Event") #this will produce inclusive counts per Layer/Disk
                              .reduce("COUNT")    
@@ -74,8 +74,6 @@ SiPixelPhase1TrackEfficiencyVertices= DefaultHistoTrack.clone(
    )
 )
 
-
-
 SiPixelPhase1TrackEfficiencyConf = cms.VPSet(
   SiPixelPhase1TrackEfficiencyValid,
   SiPixelPhase1TrackEfficiencyMissing,
@@ -83,8 +81,7 @@ SiPixelPhase1TrackEfficiencyConf = cms.VPSet(
   SiPixelPhase1TrackEfficiencyVertices
 )
 
-
-SiPixelPhase1TrackEfficiencyAnalyzer = cms.EDAnalyzer("SiPixelPhase1TrackEfficiency",
+SiPixelPhase1TrackEfficiencyAnalyzerNoTrig = cms.EDAnalyzer("SiPixelPhase1TrackEfficiency",
         clusters = cms.InputTag("siPixelClusters"),
         tracks = cms.InputTag("generalTracks"),
         primaryvertices = cms.InputTag("offlinePrimaryVertices"),
@@ -92,7 +89,51 @@ SiPixelPhase1TrackEfficiencyAnalyzer = cms.EDAnalyzer("SiPixelPhase1TrackEfficie
         geometry = SiPixelPhase1Geometry
 )
 
-SiPixelPhase1TrackEfficiencyHarvester = DQMEDHarvester("SiPixelPhase1Harvester",
+SiPixelPhase1TrackEfficiencyHarvesterNoTrig = DQMEDHarvester("SiPixelPhase1Harvester",
         histograms = SiPixelPhase1TrackEfficiencyConf,
         geometry = SiPixelPhase1Geometry
 )
+
+#Trigger Analyzer
+import DQM.SiPixelPhase1Common.TriggerEventFlag_cfi as trigger
+
+SiPixelPhase1TrackEfficiencyConfHLT = cms.VPSet()
+SiPixelPhase1TrackEfficiencyConfL1 = cms.VPSet()
+
+for i in range( 0, len(SiPixelPhase1TrackEfficiencyConf) ):
+  histHLT = SiPixelPhase1TrackEfficiencyConf[i].clone(
+              topFolderName = cms.string( SiPixelPhase1TrackEfficiencyConf[i].topFolderName.value() + trigger.HLTfoldername.value() )
+            )
+  SiPixelPhase1TrackEfficiencyConfHLT.append( histHLT )
+  histL1 = SiPixelPhase1TrackEfficiencyConf[i].clone(
+              topFolderName = cms.string( SiPixelPhase1TrackEfficiencyConf[i].topFolderName.value() + trigger.L1foldername.value() )
+            )
+  SiPixelPhase1TrackEfficiencyConfL1.append( histL1 )
+
+SiPixelPhase1TrackEfficiencyAnalyzerHLT = SiPixelPhase1TrackEfficiencyAnalyzerNoTrig.clone(
+        histograms = SiPixelPhase1TrackEfficiencyConfHLT,
+        triggerflags = trigger.SiPixelPhase1TriggerHLT
+)
+
+SiPixelPhase1TrackEfficiencyHarvesterHLT = SiPixelPhase1TrackEfficiencyHarvesterNoTrig.clone(
+        histograms = SiPixelPhase1TrackEfficiencyConfHLT
+)
+
+SiPixelPhase1TrackEfficiencyAnalyzerL1 = SiPixelPhase1TrackEfficiencyAnalyzerNoTrig.clone(
+        histograms = SiPixelPhase1TrackEfficiencyConfL1,
+        triggerflags = trigger.SiPixelPhase1TriggerL1
+)
+
+SiPixelPhase1TrackEfficiencyHarvesterL1 = SiPixelPhase1TrackEfficiencyHarvesterNoTrig.clone(
+        histograms = SiPixelPhase1TrackEfficiencyConfL1
+)
+
+SiPixelPhase1TrackEfficiencyAnalyzer = cms.Sequence(  SiPixelPhase1TrackEfficiencyAnalyzerNoTrig
+                                                    * SiPixelPhase1TrackEfficiencyAnalyzerHLT
+                                                    * SiPixelPhase1TrackEfficiencyAnalyzerL1
+                                                   )
+
+SiPixelPhase1TrackEfficiencyHarvester = cms.Sequence(  SiPixelPhase1TrackEfficiencyHarvesterNoTrig
+       	       	          	       	       	     * SiPixelPhase1TrackEfficiencyHarvesterHLT
+                                                     * SiPixelPhase1TrackEfficiencyHarvesterL1
+       	       	       	       	 	            )

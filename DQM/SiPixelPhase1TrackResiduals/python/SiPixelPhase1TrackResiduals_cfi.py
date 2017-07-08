@@ -25,15 +25,58 @@ SiPixelPhase1TrackResidualsConf = cms.VPSet(
   SiPixelPhase1TrackResidualsResidualsY
 )
 
-SiPixelPhase1TrackResidualsAnalyzer = cms.EDAnalyzer("SiPixelPhase1TrackResiduals",
+SiPixelPhase1TrackResidualsAnalyzerNoTrig = cms.EDAnalyzer("SiPixelPhase1TrackResiduals",
         trajectoryInput = cms.string("generalTracks"),
         Tracks        = cms.InputTag("generalTracks"),
-        VertexCut                  = cms.bool(True), # Will not apply the vertex cuts on cosmics
         histograms = SiPixelPhase1TrackResidualsConf,
         geometry = SiPixelPhase1Geometry
 )
 
-SiPixelPhase1TrackResidualsHarvester = DQMEDHarvester("SiPixelPhase1Harvester",
+SiPixelPhase1TrackResidualsHarvesterNoTrig = DQMEDHarvester("SiPixelPhase1Harvester",
         histograms = SiPixelPhase1TrackResidualsConf,
         geometry = SiPixelPhase1Geometry
 )
+
+#Trigger Analyzer
+import DQM.SiPixelPhase1Common.TriggerEventFlag_cfi as trigger
+
+SiPixelPhase1TrackResidualsConfHLT = cms.VPSet()
+SiPixelPhase1TrackResidualsConfL1 = cms.VPSet()
+
+for i in range( 0, len(SiPixelPhase1TrackResidualsConf) ):
+  histHLT = SiPixelPhase1TrackResidualsConf[i].clone(
+              topFolderName = cms.string( SiPixelPhase1TrackResidualsConf[i].topFolderName.value() + trigger.HLTfoldername.value() )
+            )
+  SiPixelPhase1TrackResidualsConfHLT.append( histHLT )
+  histL1 = SiPixelPhase1TrackResidualsConf[i].clone(
+              topFolderName = cms.string( SiPixelPhase1TrackResidualsConf[i].topFolderName.value() + trigger.L1foldername.value() )
+            )
+  SiPixelPhase1TrackResidualsConfL1.append( histL1 )
+
+SiPixelPhase1TrackResidualsAnalyzerHLT = SiPixelPhase1TrackResidualsAnalyzerNoTrig.clone(
+        histograms = SiPixelPhase1TrackResidualsConfHLT,
+        triggerflags = trigger.SiPixelPhase1TriggerHLT
+)
+
+SiPixelPhase1TrackResidualsHarvesterHLT = SiPixelPhase1TrackResidualsHarvesterNoTrig.clone(
+        histograms = SiPixelPhase1TrackResidualsConfHLT
+)
+
+SiPixelPhase1TrackResidualsAnalyzerL1 = SiPixelPhase1TrackResidualsAnalyzerNoTrig.clone(
+        histograms = SiPixelPhase1TrackResidualsConfL1,
+        triggerflags = trigger.SiPixelPhase1TriggerL1
+)
+
+SiPixelPhase1TrackResidualsHarvesterL1 = SiPixelPhase1TrackResidualsHarvesterNoTrig.clone(
+        histograms = SiPixelPhase1TrackResidualsConfL1
+)
+
+SiPixelPhase1TrackResidualsAnalyzer = cms.Sequence(  SiPixelPhase1TrackResidualsAnalyzerNoTrig
+                                                   * SiPixelPhase1TrackResidualsAnalyzerHLT
+                                                   * SiPixelPhase1TrackResidualsAnalyzerL1
+                                                  )
+
+SiPixelPhase1TrackResidualsHarvester = cms.Sequence(  SiPixelPhase1TrackResidualsHarvesterNoTrig
+       	       	       	       	         	    * SiPixelPhase1TrackResidualsHarvesterHLT
+                                                    * SiPixelPhase1TrackResidualsHarvesterL1
+       	       	       	       	 	           )
