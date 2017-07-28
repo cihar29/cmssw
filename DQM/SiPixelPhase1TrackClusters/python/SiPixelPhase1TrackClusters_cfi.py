@@ -269,14 +269,18 @@ SiPixelPhase1TrackClustersConfHLT = cms.VPSet()
 SiPixelPhase1TrackClustersConfL1 = cms.VPSet()
 
 for i in range( 0, len(SiPixelPhase1TrackClustersConf) ):
-  histHLT = SiPixelPhase1TrackClustersConf[i].clone(
-              topFolderName = cms.string( SiPixelPhase1TrackClustersConf[i].topFolderName.value() + trigger.HLTfoldername.value() )
-            )
-  SiPixelPhase1TrackClustersConfHLT.append( histHLT )
-  histL1 = SiPixelPhase1TrackClustersConf[i].clone(
-              topFolderName = cms.string( SiPixelPhase1TrackClustersConf[i].topFolderName.value() + trigger.L1foldername.value() )
-            )
-  SiPixelPhase1TrackClustersConfL1.append( histL1 )
+  #if SiPixelPhase1TrackClustersConf[i].getParameter("dimensions").value() == 2:
+  #  continue
+  if SiPixelPhase1TrackClustersConf[i].getParameter("name").value() not in trigger.HLT_DontPlot:
+    histHLT = SiPixelPhase1TrackClustersConf[i].clone(
+                topFolderName = cms.string( SiPixelPhase1TrackClustersConf[i].topFolderName.value() + trigger.HLTfoldername.value() )
+              )
+    SiPixelPhase1TrackClustersConfHLT.append( histHLT )
+  if SiPixelPhase1TrackClustersConf[i].getParameter("name").value() not in trigger.L1_DontPlot:
+    histL1 = SiPixelPhase1TrackClustersConf[i].clone(
+                topFolderName = cms.string( SiPixelPhase1TrackClustersConf[i].topFolderName.value() + trigger.L1foldername.value() )
+              )
+    SiPixelPhase1TrackClustersConfL1.append( histL1 )
 
 SiPixelPhase1TrackClustersAnalyzerHLT = SiPixelPhase1TrackClustersAnalyzerNoTrig.clone(
         histograms = SiPixelPhase1TrackClustersConfHLT,

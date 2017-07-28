@@ -44,14 +44,18 @@ SiPixelPhase1TrackResidualsConfHLT = cms.VPSet()
 SiPixelPhase1TrackResidualsConfL1 = cms.VPSet()
 
 for i in range( 0, len(SiPixelPhase1TrackResidualsConf) ):
-  histHLT = SiPixelPhase1TrackResidualsConf[i].clone(
-              topFolderName = cms.string( SiPixelPhase1TrackResidualsConf[i].topFolderName.value() + trigger.HLTfoldername.value() )
-            )
-  SiPixelPhase1TrackResidualsConfHLT.append( histHLT )
-  histL1 = SiPixelPhase1TrackResidualsConf[i].clone(
-              topFolderName = cms.string( SiPixelPhase1TrackResidualsConf[i].topFolderName.value() + trigger.L1foldername.value() )
-            )
-  SiPixelPhase1TrackResidualsConfL1.append( histL1 )
+  #if SiPixelPhase1TrackResidualsConf[i].getParameter("dimensions").value() == 2:
+  #  continue
+  if SiPixelPhase1TrackResidualsConf[i].getParameter("name").value() not in trigger.HLT_DontPlot:
+    histHLT = SiPixelPhase1TrackResidualsConf[i].clone(
+                topFolderName = cms.string( SiPixelPhase1TrackResidualsConf[i].topFolderName.value() + trigger.HLTfoldername.value() )
+              )
+    SiPixelPhase1TrackResidualsConfHLT.append( histHLT )
+  if SiPixelPhase1TrackResidualsConf[i].getParameter("name").value() not in trigger.L1_DontPlot:
+    histL1 = SiPixelPhase1TrackResidualsConf[i].clone(
+                topFolderName = cms.string( SiPixelPhase1TrackResidualsConf[i].topFolderName.value() + trigger.L1foldername.value() )
+              )
+    SiPixelPhase1TrackResidualsConfL1.append( histL1 )
 
 SiPixelPhase1TrackResidualsAnalyzerHLT = SiPixelPhase1TrackResidualsAnalyzerNoTrig.clone(
         histograms = SiPixelPhase1TrackResidualsConfHLT,

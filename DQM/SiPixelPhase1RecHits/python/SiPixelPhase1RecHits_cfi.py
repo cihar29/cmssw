@@ -109,14 +109,18 @@ SiPixelPhase1RecHitsConfHLT = cms.VPSet()
 SiPixelPhase1RecHitsConfL1 = cms.VPSet()
 
 for i in range( 0, len(SiPixelPhase1RecHitsConf) ):
-  histHLT = SiPixelPhase1RecHitsConf[i].clone(
-              topFolderName = cms.string( SiPixelPhase1RecHitsConf[i].topFolderName.value() + trigger.HLTfoldername.value() )
-            )
-  SiPixelPhase1RecHitsConfHLT.append( histHLT )
-  histL1 = SiPixelPhase1RecHitsConf[i].clone(
-              topFolderName = cms.string( SiPixelPhase1RecHitsConf[i].topFolderName.value() + trigger.L1foldername.value() )
-            )
-  SiPixelPhase1RecHitsConfL1.append( histL1 )
+  #if SiPixelPhase1RecHitsConf[i].getParameter("dimensions").value() == 2:
+  #  continue
+  if SiPixelPhase1RecHitsConf[i].getParameter("name").value() not in trigger.HLT_DontPlot:
+    histHLT = SiPixelPhase1RecHitsConf[i].clone(
+                topFolderName = cms.string( SiPixelPhase1RecHitsConf[i].topFolderName.value() + trigger.HLTfoldername.value() )
+              )
+    SiPixelPhase1RecHitsConfHLT.append( histHLT )
+  if SiPixelPhase1RecHitsConf[i].getParameter("name").value() not in trigger.L1_DontPlot:
+    histL1 = SiPixelPhase1RecHitsConf[i].clone(
+                topFolderName = cms.string( SiPixelPhase1RecHitsConf[i].topFolderName.value() + trigger.L1foldername.value() )
+              )
+    SiPixelPhase1RecHitsConfL1.append( histL1 )
 
 SiPixelPhase1RecHitsAnalyzerHLT = SiPixelPhase1RecHitsAnalyzerNoTrig.clone(
         histograms = SiPixelPhase1RecHitsConfHLT,

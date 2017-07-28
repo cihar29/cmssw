@@ -101,14 +101,18 @@ SiPixelPhase1TrackEfficiencyConfHLT = cms.VPSet()
 SiPixelPhase1TrackEfficiencyConfL1 = cms.VPSet()
 
 for i in range( 0, len(SiPixelPhase1TrackEfficiencyConf) ):
-  histHLT = SiPixelPhase1TrackEfficiencyConf[i].clone(
-              topFolderName = cms.string( SiPixelPhase1TrackEfficiencyConf[i].topFolderName.value() + trigger.HLTfoldername.value() )
-            )
-  SiPixelPhase1TrackEfficiencyConfHLT.append( histHLT )
-  histL1 = SiPixelPhase1TrackEfficiencyConf[i].clone(
-              topFolderName = cms.string( SiPixelPhase1TrackEfficiencyConf[i].topFolderName.value() + trigger.L1foldername.value() )
-            )
-  SiPixelPhase1TrackEfficiencyConfL1.append( histL1 )
+  #if SiPixelPhase1TrackEfficiencyConf[i].getParameter("dimensions").value() == 2:
+  #  continue
+  if SiPixelPhase1TrackEfficiencyConf[i].getParameter("name").value() not in trigger.HLT_DontPlot:
+    histHLT = SiPixelPhase1TrackEfficiencyConf[i].clone(
+                topFolderName = cms.string( SiPixelPhase1TrackEfficiencyConf[i].topFolderName.value() + trigger.HLTfoldername.value() )
+              )
+    SiPixelPhase1TrackEfficiencyConfHLT.append( histHLT )
+  if SiPixelPhase1TrackEfficiencyConf[i].getParameter("name").value() not in trigger.L1_DontPlot:
+    histL1 = SiPixelPhase1TrackEfficiencyConf[i].clone(
+                topFolderName = cms.string( SiPixelPhase1TrackEfficiencyConf[i].topFolderName.value() + trigger.L1foldername.value() )
+              )
+    SiPixelPhase1TrackEfficiencyConfL1.append( histL1 )
 
 SiPixelPhase1TrackEfficiencyAnalyzerHLT = SiPixelPhase1TrackEfficiencyAnalyzerNoTrig.clone(
         histograms = SiPixelPhase1TrackEfficiencyConfHLT,
