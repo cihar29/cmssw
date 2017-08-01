@@ -31,14 +31,8 @@ SiPixelPhase1TriggerL1 = cms.untracked.VPSet(
   genericTriggerEventFlag4L1bd
 )
 
-SiPixelPhase1TriggerHLTL1 = cms.untracked.VPSet(
-  genericTriggerEventFlag4HLTdb,
-  genericTriggerEventFlag4L1bd
-)
-
 HLTfoldername = cms.string("/trigger_HLT")
 L1foldername = cms.string("/trigger_L1")
-HLTL1foldername = cms.string("/trigger_HLT_L1")
 
 HLT_DontPlot = []
 L1_DontPlot = []
