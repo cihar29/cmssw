@@ -269,18 +269,27 @@ SiPixelPhase1TrackClustersConfHLT = cms.VPSet()
 SiPixelPhase1TrackClustersConfL1 = cms.VPSet()
 
 for i in range( 0, len(SiPixelPhase1TrackClustersConf) ):
-  #if SiPixelPhase1TrackClustersConf[i].getParameter("dimensions").value() == 2:
-  #  continue
-  if SiPixelPhase1TrackClustersConf[i].getParameter("name").value() not in trigger.HLT_DontPlot:
-    histHLT = SiPixelPhase1TrackClustersConf[i].clone(
-                topFolderName = cms.string( SiPixelPhase1TrackClustersConf[i].topFolderName.value() + trigger.HLTfoldername.value() )
-              )
-    SiPixelPhase1TrackClustersConfHLT.append( histHLT )
-  if SiPixelPhase1TrackClustersConf[i].getParameter("name").value() not in trigger.L1_DontPlot:
-    histL1 = SiPixelPhase1TrackClustersConf[i].clone(
-                topFolderName = cms.string( SiPixelPhase1TrackClustersConf[i].topFolderName.value() + trigger.L1foldername.value() )
-              )
-    SiPixelPhase1TrackClustersConfL1.append( histL1 )
+  histHLT = SiPixelPhase1TrackClustersConf[i].clone(
+              topFolderName = cms.string( SiPixelPhase1TrackClustersConf[i].topFolderName.value() + trigger.HLTfoldername.value() )
+            )
+  histL1 = SiPixelPhase1TrackClustersConf[i].clone(
+              topFolderName = cms.string( SiPixelPhase1TrackClustersConf[i].topFolderName.value() + trigger.L1foldername.value() )
+            )
+  name = SiPixelPhase1TrackClustersConf[i].getParameter("name").value()
+  if SiPixelPhase1TrackClustersConf[i].getParameter("dimensions").value() == 2:
+    histHLT.enabled = False
+    histL1.enabled = False
+  elif name in trigger.HLT_DontPlot: histHLT.enabled = False
+  elif name in trigger.L1_DontPlot: histL1.enabled = False
+  else :
+    newspecs = [spec for spec in SiPixelPhase1TrackClustersConf[i].specs if (spec not in StandardSpecification2DProfile
+                                                                    and spec not in StandardSpecificationTrend2D
+                                                                    and spec not in StandardSpecification2DOccupancy
+                                                                    and spec not in StandardSpecification2DProfile_Num)]
+    histHLT.specs = newspecs
+    histL1.specs = newspecs
+  SiPixelPhase1TrackClustersConfHLT.append( histHLT )
+  SiPixelPhase1TrackClustersConfL1.append( histL1 )
 
 SiPixelPhase1TrackClustersAnalyzerHLT = SiPixelPhase1TrackClustersAnalyzerNoTrig.clone(
         histograms = SiPixelPhase1TrackClustersConfHLT,

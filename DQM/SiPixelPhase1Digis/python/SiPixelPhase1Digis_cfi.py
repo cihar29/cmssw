@@ -206,18 +206,27 @@ SiPixelPhase1DigisConfHLT = cms.VPSet()
 SiPixelPhase1DigisConfL1 = cms.VPSet()
 
 for i in range( 0, len(SiPixelPhase1DigisConf) ):
-  #if SiPixelPhase1DigisConf[i].getParameter("dimensions").value() == 2:
-  #  continue
-  if SiPixelPhase1DigisConf[i].getParameter("name").value() not in trigger.HLT_DontPlot:
-    histHLT = SiPixelPhase1DigisConf[i].clone(
-                topFolderName = cms.string( SiPixelPhase1DigisConf[i].topFolderName.value() + trigger.HLTfoldername.value() )
-              )
-    SiPixelPhase1DigisConfHLT.append( histHLT )
-  if SiPixelPhase1DigisConf[i].getParameter("name").value() not in trigger.L1_DontPlot:
-    histL1 = SiPixelPhase1DigisConf[i].clone(
-                topFolderName = cms.string( SiPixelPhase1DigisConf[i].topFolderName.value() + trigger.L1foldername.value() )
-              )
-    SiPixelPhase1DigisConfL1.append( histL1 )
+  histHLT = SiPixelPhase1DigisConf[i].clone(
+              topFolderName = cms.string( SiPixelPhase1DigisConf[i].topFolderName.value() + trigger.HLTfoldername.value() )
+            )
+  histL1 = SiPixelPhase1DigisConf[i].clone(
+              topFolderName = cms.string( SiPixelPhase1DigisConf[i].topFolderName.value() + trigger.L1foldername.value() )
+            )
+  name = SiPixelPhase1DigisConf[i].getParameter("name").value()
+  if SiPixelPhase1DigisConf[i].getParameter("dimensions").value() == 2:
+    histHLT.enabled = False
+    histL1.enabled = False
+  elif name in trigger.HLT_DontPlot: histHLT.enabled = False
+  elif name in trigger.L1_DontPlot: histL1.enabled = False
+  else :
+    newspecs = [spec for spec in SiPixelPhase1DigisConf[i].specs if (spec not in StandardSpecification2DProfile
+                                                                    and spec not in StandardSpecificationTrend2D
+                                                                    and spec not in StandardSpecification2DOccupancy
+                                                                    and spec not in StandardSpecification2DProfile_Num)]
+    histHLT.specs = newspecs
+    histL1.specs = newspecs
+  SiPixelPhase1DigisConfHLT.append( histHLT )
+  SiPixelPhase1DigisConfL1.append( histL1 )
 
 SiPixelPhase1DigisAnalyzerHLT = SiPixelPhase1DigisAnalyzerNoTrig.clone(
         histograms = SiPixelPhase1DigisConfHLT,

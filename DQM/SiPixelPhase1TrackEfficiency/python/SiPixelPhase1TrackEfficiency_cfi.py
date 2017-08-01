@@ -101,18 +101,27 @@ SiPixelPhase1TrackEfficiencyConfHLT = cms.VPSet()
 SiPixelPhase1TrackEfficiencyConfL1 = cms.VPSet()
 
 for i in range( 0, len(SiPixelPhase1TrackEfficiencyConf) ):
-  #if SiPixelPhase1TrackEfficiencyConf[i].getParameter("dimensions").value() == 2:
-  #  continue
-  if SiPixelPhase1TrackEfficiencyConf[i].getParameter("name").value() not in trigger.HLT_DontPlot:
-    histHLT = SiPixelPhase1TrackEfficiencyConf[i].clone(
-                topFolderName = cms.string( SiPixelPhase1TrackEfficiencyConf[i].topFolderName.value() + trigger.HLTfoldername.value() )
-              )
-    SiPixelPhase1TrackEfficiencyConfHLT.append( histHLT )
-  if SiPixelPhase1TrackEfficiencyConf[i].getParameter("name").value() not in trigger.L1_DontPlot:
-    histL1 = SiPixelPhase1TrackEfficiencyConf[i].clone(
-                topFolderName = cms.string( SiPixelPhase1TrackEfficiencyConf[i].topFolderName.value() + trigger.L1foldername.value() )
-              )
-    SiPixelPhase1TrackEfficiencyConfL1.append( histL1 )
+  histHLT = SiPixelPhase1TrackEfficiencyConf[i].clone(
+              topFolderName = cms.string( SiPixelPhase1TrackEfficiencyConf[i].topFolderName.value() + trigger.HLTfoldername.value() )
+            )
+  histL1 = SiPixelPhase1TrackEfficiencyConf[i].clone(
+              topFolderName = cms.string( SiPixelPhase1TrackEfficiencyConf[i].topFolderName.value() + trigger.L1foldername.value() )
+            )
+  name = SiPixelPhase1TrackEfficiencyConf[i].getParameter("name").value()
+  if SiPixelPhase1TrackEfficiencyConf[i].getParameter("dimensions").value() == 2:
+    histHLT.enabled = False
+    histL1.enabled = False
+  elif name in trigger.HLT_DontPlot: histHLT.enabled = False
+  elif name in trigger.L1_DontPlot: histL1.enabled = False
+  else :
+    newspecs = [spec for spec in SiPixelPhase1TrackEfficiencyConf[i].specs if (spec not in StandardSpecification2DProfile
+                                                                    and spec not in StandardSpecificationTrend2D
+                                                                    and spec not in StandardSpecification2DOccupancy
+                                                                    and spec not in StandardSpecification2DProfile_Num)]
+    histHLT.specs = newspecs
+    histL1.specs = newspecs
+  SiPixelPhase1TrackEfficiencyConfHLT.append( histHLT )
+  SiPixelPhase1TrackEfficiencyConfL1.append( histL1 )
 
 SiPixelPhase1TrackEfficiencyAnalyzerHLT = SiPixelPhase1TrackEfficiencyAnalyzerNoTrig.clone(
         histograms = SiPixelPhase1TrackEfficiencyConfHLT,
