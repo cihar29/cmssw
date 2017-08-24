@@ -25,12 +25,16 @@ SiPixelPhase1TrackResidualsConf = cms.VPSet(
   SiPixelPhase1TrackResidualsResidualsY
 )
 
+#Trigger Analyzer
+import DQM.SiPixelPhase1Common.TriggerEventFlag_cfi as trigger
+
 SiPixelPhase1TrackResidualsAnalyzer = cms.EDAnalyzer("SiPixelPhase1TrackResiduals",
         trajectoryInput = cms.string("generalTracks"),
         Tracks        = cms.InputTag("generalTracks"),
         VertexCut                  = cms.bool(True), # Will not apply the vertex cuts on cosmics
         histograms = SiPixelPhase1TrackResidualsConf,
-        geometry = SiPixelPhase1Geometry
+        geometry = SiPixelPhase1Geometry,
+        triggerflags = trigger.SiPixelPhase1Triggers
 )
 
 SiPixelPhase1TrackResidualsHarvester = DQMEDHarvester("SiPixelPhase1Harvester",

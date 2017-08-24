@@ -180,10 +180,14 @@ SiPixelPhase1DigisConf = cms.VPSet(
   SiPixelPhase1DigisOccupancy,
 )
 
+#Trigger Analyzer
+import DQM.SiPixelPhase1Common.TriggerEventFlag_cfi as trigger
+
 SiPixelPhase1DigisAnalyzer = cms.EDAnalyzer("SiPixelPhase1Digis",
         src = cms.InputTag("siPixelDigis"), 
         histograms = SiPixelPhase1DigisConf,
-        geometry = SiPixelPhase1Geometry
+        geometry = SiPixelPhase1Geometry,
+        triggerflags = trigger.SiPixelPhase1Triggers
 )
 
 SiPixelPhase1DigisHarvester = DQMEDHarvester("SiPixelPhase1Harvester",

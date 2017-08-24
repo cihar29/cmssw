@@ -92,10 +92,14 @@ SiPixelPhase1RawDataConf = cms.VPSet(
   SiPixelPhase1RawDataTypeNErrors,
 )
 
+#Trigger Analyzer
+import DQM.SiPixelPhase1Common.TriggerEventFlag_cfi as trigger
+
 SiPixelPhase1RawDataAnalyzer = cms.EDAnalyzer("SiPixelPhase1RawData",
         src = cms.InputTag("siPixelDigis"),
         histograms = SiPixelPhase1RawDataConf,
-        geometry = SiPixelPhase1Geometry
+        geometry = SiPixelPhase1Geometry,
+        triggerflags = trigger.SiPixelPhase1Triggers
 )
 
 SiPixelPhase1RawDataHarvester = DQMEDHarvester("SiPixelPhase1Harvester",

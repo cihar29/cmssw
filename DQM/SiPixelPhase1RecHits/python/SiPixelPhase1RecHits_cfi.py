@@ -90,12 +90,15 @@ SiPixelPhase1RecHitsConf = cms.VPSet(
   SiPixelPhase1RecHitsProb,
 )
 
+#Trigger Analyzer
+import DQM.SiPixelPhase1Common.TriggerEventFlag_cfi as trigger
+
 SiPixelPhase1RecHitsAnalyzer = cms.EDAnalyzer("SiPixelPhase1RecHits",
         src = cms.InputTag("generalTracks"),
         histograms = SiPixelPhase1RecHitsConf,
         geometry = SiPixelPhase1Geometry,
-        onlyValidHits = cms.bool(False)
-
+        onlyValidHits = cms.bool(False),
+        triggerflags = trigger.SiPixelPhase1Triggers
 )
 
 SiPixelPhase1RecHitsHarvester = DQMEDHarvester("SiPixelPhase1Harvester",
