@@ -21,6 +21,8 @@ SiPixelPhase1Base::SiPixelPhase1Base( const edm::ParameterSet& iConfig ) :
   for( auto& flag : flags ){
     triggerlist.emplace_back( new GenericTriggerEventFlag(flag, consumesCollector(), *this) );
   }
+  numTriggers = triggerlist.size();
+  triggers_pass.assign(numTriggers, true);
 }
 
 // Booking histograms as required by the DQM
@@ -42,18 +44,33 @@ SiPixelPhase1Base::bookHistograms(
   }
 }
 
-// trigger checking function
+// check individual trigger
 bool
 SiPixelPhase1Base::checktrigger(
   const edm::Event&      iEvent,
   const edm::EventSetup& iSetup,
   const unsigned         trgidx ) const
 {
+  //no triggers loaded
+  if (triggerlist.size() == 0) return true;
+
   // Always return true for MC
   if( !iEvent.isRealData() ) { return true; }
+
+  if ( trgidx >= triggerlist.size() ) { cout << "Trigger index " << trgidx << " not found." << endl; return true; }
 
   // Always return true is flag is not on;
   if( !triggerlist.at(trgidx)->on() ) { return true; }
 
   return triggerlist.at(trgidx)->accept( iEvent, iSetup );
+}
+
+// check all triggers
+void
+SiPixelPhase1Base::updateTriggers(
+  const edm::Event&	 iEvent,
+  const edm::EventSetup& iSetup    )
+{
+  for (unsigned int i=0; i<numTriggers; i++ )
+    triggers_pass[i] = !iEvent.isRealData() || !triggerlist[i]->on() || triggerlist[i]->accept( iEvent, iSetup );
 }

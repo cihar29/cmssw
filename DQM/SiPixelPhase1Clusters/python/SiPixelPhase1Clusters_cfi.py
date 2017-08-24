@@ -20,7 +20,7 @@ SiPixelPhase1ClustersCharge = DefaultHistoDigiCluster.clone(
 SiPixelPhase1ClustersSize = DefaultHistoDigiCluster.clone(
   name = "size",
   title = "Total Cluster Size",
-  range_min = 0, range_max = 50, range_nbins = 50,
+  range_min = 0, range_max = 30, range_nbins = 30,
   xlabel = "size[pixels]",
   specs = VPSet(
     StandardSpecification2DProfile,
@@ -34,7 +34,7 @@ SiPixelPhase1ClustersSize = DefaultHistoDigiCluster.clone(
 SiPixelPhase1ClustersSizeX = DefaultHistoDigiCluster.clone(
   name = "sizeX",
   title = "Cluster Size in X",
-  range_min = 0, range_max = 50, range_nbins = 50,
+  range_min = 0, range_max = 30, range_nbins = 30,
   xlabel = "size[pixels]",
   specs = VPSet(
     #StandardSpecification2DProfile,
@@ -48,7 +48,7 @@ SiPixelPhase1ClustersSizeX = DefaultHistoDigiCluster.clone(
 SiPixelPhase1ClustersSizeY = DefaultHistoDigiCluster.clone(
   name = "sizeY",
   title = "Cluster Size in Y",
-  range_min = 0, range_max = 50, range_nbins = 50,
+  range_min = 0, range_max = 30, range_nbins = 30,
   xlabel = "size[pixels]",
   specs = VPSet(
     #StandardSpecification2DProfile,
@@ -83,7 +83,6 @@ SiPixelPhase1ClustersNClusters = DefaultHistoDigiCluster.clone(
   )
 )
 
-
 SiPixelPhase1ClustersNClustersInclusive = DefaultHistoDigiCluster.clone(
   name = "clusters",
   title = "Clusters",
@@ -95,12 +94,12 @@ SiPixelPhase1ClustersNClustersInclusive = DefaultHistoDigiCluster.clone(
   )
 )
 
-
 SiPixelPhase1ClustersEventrate = DefaultHistoDigiCluster.clone(
   name = "clustereventrate",
   title = "Number of Events with clusters",
   ylabel = "#Events",
   dimensions = 0,
+  enabled=False,
   specs = VPSet(
     Specification().groupBy("Lumisection")
                    .groupBy("", "EXTEND_X").save(),
@@ -109,7 +108,6 @@ SiPixelPhase1ClustersEventrate = DefaultHistoDigiCluster.clone(
     )
 
 )
-
 
 SiPixelPhase1ClustersPositionB = DefaultHistoDigiCluster.clone(
   name = "clusterposition_zphi",
@@ -250,19 +248,15 @@ SiPixelPhase1ClustersConf = cms.VPSet(
   SiPixelPhase1ClustersPixelToStripRatio
 )
 
-## Uncomment to add trigger event flag settings
-import DQM.SiPixelPhase1Common.TriggerEventFlag_cfi as triggerflag
-SiPixelPhase1ClustersTriggers = cms.VPSet(
-#   triggerflag.genericTriggerEventFlag4HLTdb,
-#   triggerflag.genericTriggerEventFlag4L1bd,
-)
+#Trigger Analyzer
+import DQM.SiPixelPhase1Common.TriggerEventFlag_cfi as trigger
 
 SiPixelPhase1ClustersAnalyzer = cms.EDAnalyzer("SiPixelPhase1Clusters",
         pixelSrc = cms.InputTag("siPixelClusters"),
         stripSrc = cms.InputTag("siStripClusters"),
         histograms = SiPixelPhase1ClustersConf,
         geometry = SiPixelPhase1Geometry,
-        triggerflag = SiPixelPhase1ClustersTriggers,
+        triggerflags = trigger.SiPixelPhase1Triggers
 )
 
 SiPixelPhase1ClustersHarvester = DQMEDHarvester("SiPixelPhase1Harvester",

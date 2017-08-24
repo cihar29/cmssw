@@ -29,6 +29,7 @@ SiPixelPhase1TrackEfficiency::SiPixelPhase1TrackEfficiency(const edm::ParameterS
 }
 
 void SiPixelPhase1TrackEfficiency::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
+  updateTriggers(iEvent,iSetup);
 
   // get geometry
   edm::ESHandle<TrackerGeometry> tracker;
@@ -40,7 +41,7 @@ void SiPixelPhase1TrackEfficiency::analyze(const edm::Event& iEvent, const edm::
   iEvent.getByToken( vtxToken_, vertices);
 
   if (!vertices.isValid()) return;
-  histo[VERTICES].fill(vertices->size(),DetId(0),&iEvent);
+  histo[VERTICES].fill(vertices->size(),DetId(0),triggers_pass,&iEvent);
   if (vertices->size() == 0) return;
 
   // should be used for weird cuts
@@ -112,12 +113,12 @@ void SiPixelPhase1TrackEfficiency::analyze(const edm::Event& iEvent, const edm::
       */
 
       if (isHitValid)   {
-        histo[VALID].fill(id, &iEvent);
-        histo[EFFICIENCY].fill(1, id, &iEvent);
+        histo[VALID].fill(id, triggers_pass, &iEvent);
+        histo[EFFICIENCY].fill(1, id, triggers_pass, &iEvent);
       }
       if (isHitMissing) {
-        histo[MISSING].fill(id, &iEvent);
-        histo[EFFICIENCY].fill(0, id, &iEvent);
+        histo[MISSING].fill(id, triggers_pass, &iEvent);
+        histo[EFFICIENCY].fill(0, id, triggers_pass, &iEvent);
       }
     }
   }

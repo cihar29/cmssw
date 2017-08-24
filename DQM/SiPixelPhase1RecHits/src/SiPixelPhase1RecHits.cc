@@ -33,6 +33,8 @@ SiPixelPhase1RecHits::SiPixelPhase1RecHits(const edm::ParameterSet& iConfig) :
 
 void SiPixelPhase1RecHits::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
 
+  updateTriggers(iEvent,iSetup);
+
   edm::ESHandle<TrackerGeometry> tracker;
   iSetup.get<TrackerDigiGeometryRecord>().get(tracker);
   assert(tracker.isValid());
@@ -103,22 +105,22 @@ void SiPixelPhase1RecHits::analyze(const edm::Event& iEvent, const edm::EventSet
       float lerr_x = sqrt(lerr.xx());
       float lerr_y = sqrt(lerr.yy());
 
-      histo[NRECHITS].fill(id, &iEvent, col, row); //in general a inclusive counter of missing/valid/inactive hits
+      histo[NRECHITS].fill(id, triggers_pass, &iEvent, col, row); //in general a inclusive counter of missing/valid/inactive hits
 
       if (isHitValid){
-	histo[CLUST_X].fill(sizeX, id, &iEvent, col, row);
-	histo[CLUST_Y].fill(sizeY, id, &iEvent, col, row);
+	histo[CLUST_X].fill(sizeX, id, triggers_pass, &iEvent, col, row);
+	histo[CLUST_Y].fill(sizeY, id, triggers_pass, &iEvent, col, row);
       }
 
-      histo[ERROR_X].fill(lerr_x, id, &iEvent);
-      histo[ERROR_Y].fill(lerr_y, id, &iEvent);
+      histo[ERROR_X].fill(lerr_x, id, triggers_pass, &iEvent);
+      histo[ERROR_Y].fill(lerr_y, id, triggers_pass, &iEvent);
 
-      histo[POS].fill(rechit_x, rechit_y, id, &iEvent);
+      histo[POS].fill(rechit_x, rechit_y, id, triggers_pass, &iEvent);
       
       if (isHitValid){
 	double clusterProbability= prechit->clusterProbability(0);
 	if (clusterProbability > 0)
-	  histo[CLUSTER_PROB].fill(log10(clusterProbability), id, &iEvent);
+	  histo[CLUSTER_PROB].fill(log10(clusterProbability), id, triggers_pass, &iEvent);
       }
     }
   }

@@ -35,9 +35,9 @@ public:
   void addSpec(SummationSpecification spec);
 
   // Event is only needed for time-based quantities; row, col only if strcture within module is interesting.
-  void fill(DetId sourceModule, const edm::Event *sourceEvent = nullptr, int col = 0, int row = 0); 
-  void fill(double value, DetId sourceModule, const edm::Event *sourceEvent = nullptr, int col = 0, int row = 0); 
-  void fill(double x, double y, DetId sourceModule, const edm::Event *sourceEvent = nullptr, int col = 0, int row = 0); 
+  void fill(DetId sourceModule, const std::vector<bool>& triggers_pass, const edm::Event *sourceEvent = nullptr, int col = 0, int row = 0); 
+  void fill(double value, DetId sourceModule, const std::vector<bool>& triggers_pass, const edm::Event *sourceEvent = nullptr, int col = 0, int row = 0); 
+  void fill(double x, double y, DetId sourceModule, const std::vector<bool>& triggers_pass, const edm::Event *sourceEvent = nullptr, int col = 0, int row = 0); 
 
   // This needs to be called after each event (in the analyzer) for per-event counting, like ndigis.
   void executePerEventHarvesting(edm::Event const* ev);

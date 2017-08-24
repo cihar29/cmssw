@@ -31,6 +31,7 @@ SiPixelPhase1TrackClusters::SiPixelPhase1TrackClusters(const edm::ParameterSet& 
 }
 
 void SiPixelPhase1TrackClusters::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
+  updateTriggers(iEvent,iSetup);
 
   // get geometry
   edm::ESHandle<TrackerGeometry> tracker;
@@ -103,19 +104,19 @@ void SiPixelPhase1TrackClusters::analyze(const edm::Event& iEvent, const edm::Ev
     }
 
     // statistics on tracks
-    histo[NTRACKS].fill(1, DetId(0), &iEvent);
+    histo[NTRACKS].fill(1, DetId(0), triggers_pass, &iEvent);
     if (isBpixtrack || isFpixtrack) 
-      histo[NTRACKS].fill(2, DetId(0), &iEvent);
+      histo[NTRACKS].fill(2, DetId(0), triggers_pass, &iEvent);
     if (isBpixtrack) 
-      histo[NTRACKS].fill(3, DetId(0), &iEvent);
+      histo[NTRACKS].fill(3, DetId(0), triggers_pass, &iEvent);
     if (isFpixtrack) 
-      histo[NTRACKS].fill(4, DetId(0), &iEvent);
+      histo[NTRACKS].fill(4, DetId(0), triggers_pass, &iEvent);
 
     if (crossesPixVol) {
       if (isBpixtrack || isFpixtrack)
-        histo[NTRACKS_VOLUME].fill(1, DetId(0), &iEvent);
+        histo[NTRACKS_VOLUME].fill(1, DetId(0), triggers_pass, &iEvent);
       else 
-        histo[NTRACKS_VOLUME].fill(0, DetId(0), &iEvent);
+        histo[NTRACKS_VOLUME].fill(0, DetId(0), triggers_pass, &iEvent);
     }
   }
 
@@ -137,17 +138,17 @@ void SiPixelPhase1TrackClusters::analyze(const edm::Event& iEvent, const edm::Ev
       GlobalPoint clustgp = geomdetunit->surface().toGlobal(clustlp);
 
       if (is_ontrack) {
-        histo[ONTRACK_NCLUSTERS ].fill(id, &iEvent);
-        histo[ONTRACK_CHARGE    ].fill(double(corrected_charge), id, &iEvent);
-        histo[ONTRACK_SIZE      ].fill(double(cluster.size()  ), id, &iEvent);
-        histo[ONTRACK_POSITION_B].fill(clustgp.z(),   clustgp.phi(),   id, &iEvent);
-        histo[ONTRACK_POSITION_F].fill(clustgp.x(),   clustgp.y(),     id, &iEvent);
+        histo[ONTRACK_NCLUSTERS ].fill(id, triggers_pass, &iEvent);
+        histo[ONTRACK_CHARGE    ].fill(double(corrected_charge), id, triggers_pass, &iEvent);
+        histo[ONTRACK_SIZE      ].fill(double(cluster.size()  ), id, triggers_pass, &iEvent);
+        histo[ONTRACK_POSITION_B].fill(clustgp.z(),   clustgp.phi(),   id, triggers_pass, &iEvent);
+        histo[ONTRACK_POSITION_F].fill(clustgp.x(),   clustgp.y(),     id, triggers_pass, &iEvent);
       } else {
-        histo[OFFTRACK_NCLUSTERS ].fill(id, &iEvent);
-        histo[OFFTRACK_CHARGE    ].fill(double(cluster.charge()), id, &iEvent);
-        histo[OFFTRACK_SIZE      ].fill(double(cluster.size()  ), id, &iEvent);
-        histo[OFFTRACK_POSITION_B].fill(clustgp.z(),   clustgp.phi(),   id, &iEvent);
-        histo[OFFTRACK_POSITION_F].fill(clustgp.x(),   clustgp.y(),     id, &iEvent);
+        histo[OFFTRACK_NCLUSTERS ].fill(id, triggers_pass, &iEvent);
+        histo[OFFTRACK_CHARGE    ].fill(double(cluster.charge()), id, triggers_pass, &iEvent);
+        histo[OFFTRACK_SIZE      ].fill(double(cluster.size()  ), id, triggers_pass, &iEvent);
+        histo[OFFTRACK_POSITION_B].fill(clustgp.z(),   clustgp.phi(),   id, triggers_pass, &iEvent);
+        histo[OFFTRACK_POSITION_F].fill(clustgp.x(),   clustgp.y(),     id, triggers_pass, &iEvent);
       }
     }
   }

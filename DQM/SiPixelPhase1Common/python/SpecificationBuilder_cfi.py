@@ -28,6 +28,13 @@ FIRST    = cms.int32(1)  # first grouping, before and/or after counting
 STAGE1   = cms.int32(2)  # USE/EXTEND/PROFILE for step1
 STAGE2   = cms.int32(3)  # REDUCE/EXTEND/GROUPBY/CUSTOM for harvesting
 
+#Triggers
+# Must match order in TriggerEventFlag_cfi.py and SummationSpecification{.h,.cc}
+NOTRIG   = cms.int32(-1)
+HLT      = cms.int32(0)
+L1       = cms.int32(1)
+trigs = {'NOTRIG':NOTRIG, 'HLT':HLT, 'L1':L1}
+
 # small helpers
 def val(maybecms):
   if hasattr(maybecms, "value"):
@@ -58,13 +65,14 @@ DefaultConf = cms.PSet(enabled = cms.bool(True))
 #  - SAVE is ignored
 
 class Specification(cms.PSet):
-  def __init__(self, conf = DefaultConf):
+  def __init__(self, conf = DefaultConf, trig = NOTRIG):
     super(Specification, self).__init__()
     # these are the steps passed down to C++. Will be filled later.
     self.spec = cms.VPSet()
     # this is currently only an additional enable flag. Might add topFolder or
     # range there in the future.
     self.conf = conf
+    self.trig = trig
 
     # these are onlly used during construction.
     self._activeColumns = set()
@@ -76,6 +84,15 @@ class Specification(cms.PSet):
     t = Specification(self.conf)
     t.spec = deepcopy(self.spec, memo)
     return t 
+
+  def trigger(self, trig):
+    if trig not in trigs:
+      raise Exception("Unknown trigger")
+    elif self.trig != NOTRIG and self.trig != trigs[trig]:
+      raise Exception("Trigger already added")
+    else:
+      self.trig = trigs[trig]
+    return self
 
   def groupBy(self, cols, mode = "SUM"):
     cnames = filter(len, val(cols).split("/")) # omit empty items

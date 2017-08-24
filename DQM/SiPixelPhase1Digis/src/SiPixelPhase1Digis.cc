@@ -27,6 +27,8 @@ SiPixelPhase1Digis::SiPixelPhase1Digis(const edm::ParameterSet& iConfig) :
 
 void SiPixelPhase1Digis::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
 
+  updateTriggers(iEvent,iSetup);
+
   edm::Handle<edm::DetSetVector<PixelDigi>> input;
   iEvent.getByToken(srcToken_, input);
   if (!input.isValid()) return; 
@@ -34,21 +36,23 @@ void SiPixelPhase1Digis::analyze(const edm::Event& iEvent, const edm::EventSetup
 
   edm::DetSetVector<PixelDigi>::const_iterator it;
   for (it = input->begin(); it != input->end(); ++it) {
+    DetId id = DetId(it->detId());
+
     for(PixelDigi const& digi : *it) {
       hasDigis=true;
-      histo[ADC].fill((double) digi.adc(), DetId(it->detId()), &iEvent, digi.column(), digi.row());
-      histo[MAP].fill(DetId(it->detId()), &iEvent, digi.column(), digi.row()); 
-      histo[OCCUPANCY].fill(DetId(it->detId()), &iEvent, digi.column(), digi.row()); 
-      histo[NDIGIS    ].fill(DetId(it->detId()), &iEvent); // count
-      histo[NDIGISINCLUSIVE].fill(DetId(it->detId()), &iEvent); // count
-      histo[NDIGIS_FED].fill(DetId(it->detId()), &iEvent); 
-      histo[NDIGIS_FEDtrend].fill(DetId(it->detId()), &iEvent);  
+      histo[ADC]            .fill((double) digi.adc(), id, triggers_pass, &iEvent, digi.column(), digi.row());
+      histo[MAP]            .fill(id, triggers_pass, &iEvent, digi.column(), digi.row()); 
+      histo[OCCUPANCY]      .fill(id, triggers_pass, &iEvent, digi.column(), digi.row()); 
+      histo[NDIGIS]         .fill(id, triggers_pass, &iEvent); // count
+      histo[NDIGISINCLUSIVE].fill(id, triggers_pass, &iEvent); // count
+      histo[NDIGIS_FED]     .fill(id, triggers_pass, &iEvent); 
+      histo[NDIGIS_FEDtrend].fill(id, triggers_pass, &iEvent);  
     }
   }
-  if (hasDigis) histo[EVENT].fill(DetId(0), &iEvent);
-  histo[NDIGIS    ].executePerEventHarvesting(&iEvent);
+  if (hasDigis) histo[EVENT].fill(DetId(0), triggers_pass, &iEvent);
+  histo[NDIGIS]         .executePerEventHarvesting(&iEvent);
   histo[NDIGISINCLUSIVE].executePerEventHarvesting(&iEvent);
-  histo[NDIGIS_FED].executePerEventHarvesting(&iEvent); 
+  histo[NDIGIS_FED]     .executePerEventHarvesting(&iEvent); 
   histo[NDIGIS_FEDtrend].executePerEventHarvesting(&iEvent);
 }
 

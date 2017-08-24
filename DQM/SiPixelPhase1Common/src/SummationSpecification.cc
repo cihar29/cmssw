@@ -17,9 +17,12 @@ SummationSpecification::parse_columns(std::string name, GeometryInterface& geome
   return geometryInterface.intern(name); 
 }
 
+const std::string trigLabels[] = {"HLT", "L1"};
 
 SummationSpecification::SummationSpecification(const edm::ParameterSet& config, GeometryInterface& geometryInterface) {
+
   auto spec = config.getParameter<edm::VParameterSet>("spec");
+  trig = SummationSpecification::Trig( config.getParameter<int>("trig") );
 
   for (auto step : spec) {
     auto s = SummationStep();

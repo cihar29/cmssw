@@ -62,7 +62,7 @@ void HistogramManager::addSpec(SummationSpecification spec) {
 // fillInternal (called from here) does more lookups on the geometry, if EXTEND
 // is used; we do not attempt the optimization there since in most cases row/
 // col are involved.
-void HistogramManager::fill(double x, double y, DetId sourceModule,
+void HistogramManager::fill(double x, double y, DetId sourceModule, const std::vector<bool>& triggers_pass,
                             const edm::Event* sourceEvent, int col, int row) {
   if (!enabled) return;
 
@@ -76,16 +76,16 @@ void HistogramManager::fill(double x, double y, DetId sourceModule,
   // NOTE that this might change if we want to support per-ROC booking 
   // NOTE that we could even cache the bin to fill if iq and spec are identical,
   // also across HistogramManagers.
-  bool cached = false;
-  if (sourceModule == this->iq.sourceModule
-    && sourceEvent == this->iq.sourceEvent) {
-    cached = true;
-  }
+  bool cached = (sourceModule == this->iq.sourceModule && sourceEvent == this->iq.sourceEvent);
+
   iq = GeometryInterface::InterestingQuantities{sourceEvent, sourceModule, 
                                                 int16_t(col), int16_t(row)};
+
   for (unsigned int i = 0; i < specs.size(); i++) {
     auto& s = specs[i];
+    if ( s.trig != SummationSpecification::NOTRIG && !triggers_pass[s.trig] ) continue;
     auto& t = s.steps[0].type == SummationStep::COUNT ? counters[i] : tables[i];
+
     if (!cached) { // recompute ME to fill (aka fastpath)
       significantvalues[i].clear();
       geometryInterface.extractColumns(s.steps[0].columns, iq,
@@ -105,23 +105,21 @@ void HistogramManager::fill(double x, double y, DetId sourceModule,
     // A fastpath of nullptr means there is no ME for this iq, which can be 
     // a valid cached result.
     if (fastpath[i]) {
-      if (s.steps[0].type == SummationStep::COUNT) {
-        fastpath[i]->count++;
-      } else {
-        fillInternal(x, y, this->dimensions, iq, s.steps.begin()+1, s.steps.end(), *(fastpath[i]));
-      }
+      if (s.steps[0].type == SummationStep::COUNT) fastpath[i]->count++;
+
+      else fillInternal(x, y, this->dimensions, iq, s.steps.begin()+1, s.steps.end(), *(fastpath[i]));
     }
   }
 }
-void HistogramManager::fill(double x, DetId sourceModule,
+void HistogramManager::fill(double x, DetId sourceModule, const std::vector<bool>& triggers_pass,
                             const edm::Event* sourceEvent, int col, int row) {
   assert(this->dimensions == 1);
-  fill(x, 0.0, sourceModule, sourceEvent, col, row);
+  fill(x, 0.0, sourceModule, triggers_pass, sourceEvent, col, row);
 }
-void HistogramManager::fill(DetId sourceModule, const edm::Event* sourceEvent,
+void HistogramManager::fill(DetId sourceModule, const std::vector<bool>& triggers_pass, const edm::Event* sourceEvent,
                             int col, int row) {
   assert(this->dimensions == 0);
-  fill(0.0, 0.0, sourceModule, sourceEvent, col, row);
+  fill(0.0, 0.0, sourceModule, triggers_pass, sourceEvent, col, row);
 }
 
 void HistogramManager::fillInternal(double x, double y, int n_parameters,
@@ -225,6 +223,8 @@ HistogramManager::makePathName(SummationSpecification const& s,
     SummationStep const* upto) {
   std::ostringstream dir("");
   std::string suffix = "";
+  std::string prefix = "";
+  if ( s.trig != SummationSpecification::NOTRIG ) prefix = trigLabels[s.trig] + "_";
 
   // we omit the last value here, to get all disks next to each other etc.
   if (significantvalues.size() > 0) {
@@ -263,7 +263,7 @@ HistogramManager::makePathName(SummationSpecification const& s,
         break; // not visible in name
     }
   }
-  return std::make_pair(top_folder_name + "/" + dir.str(), name + suffix);
+  return std::make_pair(top_folder_name + "/" + dir.str(), prefix + name + suffix);
 }
 
 
@@ -400,6 +400,7 @@ void HistogramManager::book(DQMStore::IBooker& iBooker,
         mei.dimensions = tot_parameters;
         if (mei.do_profile) mei.title = "Profile of " + mei.title;
         if (mei.zlabel.size() > 0) mei.title = mei.title + " (Z: " + mei.zlabel + ")";
+        if ( s.trig != SummationSpecification::NOTRIG ) mei.title = "(" + trigLabels[s.trig] + ") " + mei.title;
       } 
       // only update range
       MEInfo& mei = toBeBooked[significantvalues]; 

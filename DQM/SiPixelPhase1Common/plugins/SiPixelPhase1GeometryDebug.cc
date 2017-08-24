@@ -24,7 +24,9 @@ class SiPixelPhase1GeometryDebug : public SiPixelPhase1Base {
     : SiPixelPhase1Base(conf) {
   }
 
-  void analyze(const edm::Event& iEvent, const edm::EventSetup&) {
+  void analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
+    updateTriggers(iEvent,iSetup);
+
     auto& all = geometryInterface.allModules();
     GeometryInterface::Column ladder = geometryInterface.intern("PXLadder");
     GeometryInterface::Column blade  = geometryInterface.intern("PXBlade");
@@ -40,10 +42,10 @@ class SiPixelPhase1GeometryDebug : public SiPixelPhase1Base {
       if (ladbld.second == GeometryInterface::UNDEFINED) 
         ladbld = geometryInterface.extract(blade, iq);
 
-      histo[DETID ].fill((float) detid,         iq.sourceModule, &iEvent, iq.col, iq.row);
-      histo[LADBLD].fill((float) ladbld.second, iq.sourceModule, &iEvent, iq.col, iq.row);
-      histo[ROC   ].fill((float) rocno.second,  iq.sourceModule, &iEvent, iq.col, iq.row);
-      histo[FED   ].fill((float) fedno.second,  iq.sourceModule, &iEvent, iq.col, iq.row);
+      histo[DETID ].fill((float) detid,         iq.sourceModule, triggers_pass, &iEvent, iq.col, iq.row);
+      histo[LADBLD].fill((float) ladbld.second, iq.sourceModule, triggers_pass, &iEvent, iq.col, iq.row);
+      histo[ROC   ].fill((float) rocno.second,  iq.sourceModule, triggers_pass, &iEvent, iq.col, iq.row);
+      histo[FED   ].fill((float) fedno.second,  iq.sourceModule, triggers_pass, &iEvent, iq.col, iq.row);
     }
   }
 };

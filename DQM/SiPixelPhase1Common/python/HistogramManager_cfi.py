@@ -224,7 +224,7 @@ StandardSpecificationOccupancy = [ #this produces pixel maps with counting
        .groupBy("PXBarrel/PXLayer", "EXTEND_Y")
        .save(),
     Specification(PerLayer2D)
-       .groupBy("PXForward/PXRing/SignedBladePanelCoord/SignedDiskCoord")
+       .groupBy("PXForward/PXRing/SignedBladePanelCoord/SignedDiskCoord") # why isn't this booked??
        .groupBy("PXForward/PXRing/SignedBladePanelCoord", "EXTEND_X")
        .groupBy("PXForward/PXRing", "EXTEND_Y")
        .save()
@@ -357,3 +357,10 @@ def VPSet(*args):
             e = list(a)
         l = l+e
     return cms.VPSet(l)
+
+# add trigger to a commonly used specification
+# e.g., addTriggerToList( StandardSpecification2DProfile_Num, "HLT" )
+def addTriggerToList( specs, trig ):
+  for i in range( 0, len(specs) ):
+    specs[i].trigger(trig)
+  return specs

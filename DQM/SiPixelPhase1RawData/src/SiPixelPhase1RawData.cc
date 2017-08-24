@@ -21,15 +21,18 @@ SiPixelPhase1RawData::SiPixelPhase1RawData(const edm::ParameterSet& iConfig) :
 
 
 void SiPixelPhase1RawData::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
+  updateTriggers(iEvent,iSetup);
+
   edm::Handle<DetSetVector<SiPixelRawDataError>> input;
   iEvent.getByToken(srcToken_, input);
   if (!input.isValid()) return;
 
   for (auto it = input->begin(); it != input->end(); ++it) {
+    DetId id = it->detId();
+
     for (auto& siPixelRawDataError : *it) { 
       int fed = siPixelRawDataError.getFedId();
       int type = siPixelRawDataError.getType();
-      DetId id = it->detId();
       
       // encoding of the channel number within the FED error word
       const uint32_t LINK_bits = 6;
@@ -53,7 +56,7 @@ void SiPixelPhase1RawData::analyze(const edm::Event& iEvent, const edm::EventSet
 
       if (type == 28) { // overflow.
         for (uint32_t i = 0; i < 8; i++) {
-          if (error_data  & (1 << i)) histo[FIFOFULL].fill(i, id, &iEvent, fed, chanNmbr);
+          if (error_data  & (1 << i)) histo[FIFOFULL].fill(i, id, triggers_pass, &iEvent, fed, chanNmbr);
         }
       }
 
@@ -66,10 +69,10 @@ void SiPixelPhase1RawData::analyze(const edm::Event& iEvent, const edm::EventSet
           4, 4, 4, 4
         };
 
-        histo[TBMTYPE].fill(tbm_types[statemachine_state], id, &iEvent, fed, chanNmbr);
+        histo[TBMTYPE].fill(tbm_types[statemachine_state], id, triggers_pass, &iEvent, fed, chanNmbr);
 
         for (uint32_t i = 0; i < 8; i++) {
-          if (error_data  & (1 << i)) histo[TBMMESSAGE].fill(i, id, &iEvent, fed, chanNmbr);
+          if (error_data  & (1 << i)) histo[TBMMESSAGE].fill(i, id, triggers_pass, &iEvent, fed, chanNmbr);
         }
         continue; // we don't really consider these as errors.
       }
@@ -78,8 +81,8 @@ void SiPixelPhase1RawData::analyze(const edm::Event& iEvent, const edm::EventSet
       // We hijack column and row for FED and chan in this case,
       // the GeometryInterface does understand that.
 
-      histo[NERRORS].fill(id, &iEvent, fed, chanNmbr);
-      histo[TYPE_NERRORS].fill(type, id, &iEvent, fed, chanNmbr); 
+      histo[NERRORS].fill(id, triggers_pass, &iEvent, fed, chanNmbr);
+      histo[TYPE_NERRORS].fill(type, id, triggers_pass, &iEvent, fed, chanNmbr); 
     }
   }
 

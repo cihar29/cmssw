@@ -57,6 +57,10 @@ struct SummationSpecification {
   SummationSpecification() {};
   SummationSpecification(edm::ParameterSet const&, GeometryInterface&);
 
+  // Must match order in TriggerEventFlag_cfi.py and SpecificationBuilder_cfi.py
+  enum Trig {NOTRIG=-1, HLT=0, L1=1};
+  Trig trig = NOTRIG;
+
   template<class stream, class GI>
   void dump(stream& out, GI& gi) {
     for (auto& s : steps) {
@@ -68,5 +72,7 @@ struct SummationSpecification {
   private:
   GeometryInterface::Column parse_columns(std::string name, GeometryInterface&);
 };
+
+extern const std::string trigLabels[];
 
 #endif

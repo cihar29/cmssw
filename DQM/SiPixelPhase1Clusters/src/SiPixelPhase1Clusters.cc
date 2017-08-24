@@ -27,6 +27,9 @@ SiPixelPhase1Clusters::SiPixelPhase1Clusters(const edm::ParameterSet& iConfig) :
 }
 
 void SiPixelPhase1Clusters::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
+
+  updateTriggers(iEvent,iSetup);
+
   edm::Handle<edmNew::DetSetVector<SiPixelCluster>> inputPixel;
   iEvent.getByToken(pixelSrcToken_, inputPixel);
   if (!inputPixel.isValid()) return;
@@ -37,7 +40,7 @@ void SiPixelPhase1Clusters::analyze(const edm::Event& iEvent, const edm::EventSe
   {
     if (inputStrip.product()->data().size())
     {
-      histo[PIXEL_TO_STRIP_RATIO].fill((double)inputPixel.product()->data().size() / (double) inputStrip.product()->data().size(), DetId(0), &iEvent);
+      histo[PIXEL_TO_STRIP_RATIO].fill((double)inputPixel.product()->data().size() / (double) inputStrip.product()->data().size(), DetId(0), triggers_pass, &iEvent);
     }
   } 
 
@@ -56,34 +59,32 @@ void SiPixelPhase1Clusters::analyze(const edm::Event& iEvent, const edm::EventSe
 
     for(SiPixelCluster const& cluster : *it) {
       int row = cluster.x()-0.5, col = cluster.y()-0.5;
-      //// Uncomment to activate trigger filtering if statement
-      //// Any logical operation between trigger should be handled manually here
-      // if( checktrigger(iEvent,iSetup,FLAG_HLT) )
-      histo[READOUT_CHARGE].fill(double(cluster.charge()), id, &iEvent, col, row);
-      histo[CHARGE].fill(double(cluster.charge()), id, &iEvent, col, row);
-      histo[SIZE  ].fill(double(cluster.size()  ), id, &iEvent, col, row);
-      histo[SIZEX  ].fill(double(cluster.sizeX()  ), id, &iEvent, col, row);
-      histo[SIZEY  ].fill(double(cluster.sizeY()  ), id, &iEvent, col, row);
-      histo[NCLUSTERS].fill(id, &iEvent, col, row);
-      histo[NCLUSTERSINCLUSIVE].fill(id, &iEvent);
+
+      histo[READOUT_CHARGE].fill(double(cluster.charge()), id, triggers_pass, &iEvent, col, row);
+      histo[CHARGE].fill(double(cluster.charge()), id, triggers_pass, &iEvent, col, row);
+      histo[SIZE  ].fill(double(cluster.size()  ), id, triggers_pass, &iEvent, col, row);
+      histo[SIZEX  ].fill(double(cluster.sizeX()  ), id, triggers_pass, &iEvent, col, row);
+      histo[SIZEY  ].fill(double(cluster.sizeY()  ), id, triggers_pass, &iEvent, col, row);
+      histo[NCLUSTERS].fill(id, triggers_pass, &iEvent, col, row);
+      histo[NCLUSTERSINCLUSIVE].fill(id, triggers_pass, &iEvent);
       hasClusters=true;
       if (cluster.size()>1){
-        histo[READOUT_NCLUSTERS].fill(id, &iEvent);
+        histo[READOUT_NCLUSTERS].fill(id, triggers_pass, &iEvent);
       }
 
       LocalPoint clustlp = topol.localPosition(MeasurementPoint(cluster.x(), cluster.y()));
       GlobalPoint clustgp = theGeomDet->surface().toGlobal(clustlp);
-      histo[POSITION_B ].fill(clustgp.z(),   clustgp.phi(),   id, &iEvent);
-      histo[POSITION_F ].fill(clustgp.x(),   clustgp.y(),     id, &iEvent);
-      histo[POSITION_XZ].fill(clustgp.x(),   clustgp.z(),     id, &iEvent);
-      histo[POSITION_YZ].fill(clustgp.y(),   clustgp.z(),     id, &iEvent);
-      histo[SIZE_VS_ETA].fill(clustgp.eta(), cluster.sizeY(), id, &iEvent);
+      histo[POSITION_B ].fill(clustgp.z(),   clustgp.phi(),   id, triggers_pass, &iEvent);
+      histo[POSITION_F ].fill(clustgp.x(),   clustgp.y(),     id, triggers_pass, &iEvent);
+      histo[POSITION_XZ].fill(clustgp.x(),   clustgp.z(),     id, triggers_pass, &iEvent);
+      histo[POSITION_YZ].fill(clustgp.y(),   clustgp.z(),     id, triggers_pass, &iEvent);
+      histo[SIZE_VS_ETA].fill(clustgp.eta(), cluster.sizeY(), id, triggers_pass, &iEvent);
 
     }
   }
 
 
-  if (hasClusters) histo[EVENTRATE].fill(DetId(0), &iEvent);
+  if (hasClusters) histo[EVENTRATE].fill(DetId(0), triggers_pass, &iEvent);
 
   histo[NCLUSTERS].executePerEventHarvesting(&iEvent);
   histo[READOUT_NCLUSTERS].executePerEventHarvesting(&iEvent);

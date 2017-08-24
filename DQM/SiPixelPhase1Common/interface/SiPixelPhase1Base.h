@@ -55,10 +55,13 @@ class SiPixelPhase1Base : public DQMEDAnalyzer, public HistogramManagerHolder {
   protected:
   // Returns a value of whether the trigger stored at position "trgidx" is properly fired.
   bool checktrigger( const edm::Event& iEvent, const edm::EventSetup& iSetup, const unsigned trgidx ) const;
+  void updateTriggers( const edm::Event& iEvent, const edm::EventSetup& iSetup );
+  std::vector<bool> triggers_pass;
 
   private:
   // Storing the trigger objects per plugin instance
   std::vector<std::unique_ptr<GenericTriggerEventFlag>>   triggerlist;
+  unsigned int numTriggers;
 };
 
 // This wraps the Histogram Managers into a DQMEDHarvester. It

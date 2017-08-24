@@ -27,6 +27,7 @@ SiPixelPhase1TrackResiduals::SiPixelPhase1TrackResiduals(const edm::ParameterSet
 }
 
 void SiPixelPhase1TrackResiduals::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
+  updateTriggers(iEvent,iSetup);
 
   edm::ESHandle<TrackerGeometry> tracker;
   iSetup.get<TrackerDigiGeometryRecord>().get(tracker);
@@ -66,8 +67,8 @@ void SiPixelPhase1TrackResiduals::analyze(const edm::Event& iEvent, const edm::E
       int col = (int) mp.y();
       */
       
-      histo[RESIDUAL_X].fill(it.resXprime, id, &iEvent);
-      histo[RESIDUAL_Y].fill(it.resYprime, id, &iEvent);
+      histo[RESIDUAL_X].fill(it.resXprime, id, triggers_pass, &iEvent);
+      histo[RESIDUAL_Y].fill(it.resYprime, id, triggers_pass, &iEvent);
     }
   }
 
