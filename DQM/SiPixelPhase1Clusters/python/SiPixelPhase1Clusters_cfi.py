@@ -83,11 +83,11 @@ SiPixelPhase1ClustersNClusters = DefaultHistoDigiCluster.clone(
                              .groupBy("PXForward/PXDisk/")
                              .save(nbins=100, xmin=0, xmax=10000),
 
-    Specification().groupBy("PXBarrel/PXLayer/Event").trigger('HLT') #this will produce inclusive counts per Layer/Disk
+    Specification().groupBy("PXBarrel/PXLayer/Event").trigger("HLT") #this will produce inclusive counts per Layer/Disk
                              .reduce("COUNT")    
                              .groupBy("PXBarrel/PXLayer")
                              .save(nbins=100, xmin=0, xmax=20000),
-    Specification().groupBy("PXForward/PXDisk/Event").trigger('HLT')
+    Specification().groupBy("PXForward/PXDisk/Event").trigger("HLT")
                              .reduce("COUNT")    
                              .groupBy("PXForward/PXDisk/")
                              .save(nbins=100, xmin=0, xmax=10000),

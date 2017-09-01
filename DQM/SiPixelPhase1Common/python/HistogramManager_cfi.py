@@ -1,4 +1,5 @@
 import FWCore.ParameterSet.Config as cms
+import copy
 
 from DQM.SiPixelPhase1Common.SpecificationBuilder_cfi import Specification, parent
 
@@ -361,6 +362,8 @@ def VPSet(*args):
 # add trigger to a commonly used specification
 # e.g., addTriggerToList( StandardSpecification2DProfile_Num, "HLT" )
 def addTriggerToList( specs, trig ):
+  newspecs = []
   for i in range( 0, len(specs) ):
-    specs[i].trigger(trig)
-  return specs
+    newspecs.append( copy.copy(specs[i]) )
+    newspecs[i].trigger(trig)
+  return newspecs
