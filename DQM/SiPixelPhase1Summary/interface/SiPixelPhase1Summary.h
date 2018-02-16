@@ -67,6 +67,10 @@
        edm::InputTag src_;
        bool firstLumi;
 
+       //if SiPixelPhase1 plots use a trigger, we may apply it to the summary/trend plots as well
+       bool applyTrigger_;
+       bool plotIsEmpty(DQMStore::IGetter& iGetter);
+
        std::map<std::string,MonitorElement*> summaryMap_;
        MonitorElement * reportSummary; //Float value of the average of the ins in the grand summary
 

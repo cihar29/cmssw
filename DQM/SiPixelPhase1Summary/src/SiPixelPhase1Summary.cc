@@ -55,6 +55,7 @@ SiPixelPhase1Summary::SiPixelPhase1Summary(const edm::ParameterSet& iConfig) :
    topFolderName_ = conf_.getParameter<std::string>("TopFolderName"); 
    runOnEndLumi_ = conf_.getParameter<bool>("RunOnEndLumi"); 
    runOnEndJob_ = conf_.getParameter<bool>("RunOnEndJob");
+   applyTrigger_ = conf_.getParameter<bool>("ApplyTrigger");
 
    std::vector<edm::ParameterSet> mapPSets = conf_.getParameter<std::vector<edm::ParameterSet> >("SummaryMaps");
 
@@ -83,6 +84,9 @@ void SiPixelPhase1Summary::dqmEndLuminosityBlock(DQMStore::IBooker & iBooker, DQ
   }
 
   if (runOnEndLumi_){
+    //if num_digis histogram is empty, do not fill any summary or trend plots
+    if (applyTrigger_ && plotIsEmpty(iGetter)) return;
+
     fillSummaries(iBooker,iGetter);
     int lumiSec = lumiSeg.id().luminosityBlock();
     fillTrendPlots(iBooker,iGetter,lumiSec);
@@ -103,10 +107,23 @@ void SiPixelPhase1Summary::dqmEndJob(DQMStore::IBooker & iBooker, DQMStore::IGet
     firstLumi = false;
   }
   if (runOnEndJob_){
+    //if num_digis histogram is empty, do not fill any summary or trend plots
+    if (applyTrigger_ && plotIsEmpty(iGetter)) return;
+
     fillSummaries(iBooker,iGetter);
     if (!runOnEndLumi_) fillTrendPlots(iBooker,iGetter); //If we're filling these plots at the end lumi step, it doesn't really make sense to also do them at the end job
   }
 
+}
+
+//------------------------------------------------------------------
+// Check if num_digis histogram is empty, meaning trigger is in use
+//------------------------------------------------------------------
+bool SiPixelPhase1Summary::plotIsEmpty(DQMStore::IGetter& iGetter)
+{
+  MonitorElement* me = iGetter.get(topFolderName_ + "num_digis_PXAll");
+  if (me && me->getTH1()->GetEntries() == 0) return true;
+  else                                       return false;
 }
 
 //------------------------------------------------------------------

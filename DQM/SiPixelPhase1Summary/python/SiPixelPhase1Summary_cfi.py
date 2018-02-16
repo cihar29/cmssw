@@ -9,6 +9,7 @@ SiPixelPhase1Summary_Online = DQMEDHarvester("SiPixelPhase1Summary",
     TopFolderName = cms.string('PixelPhase1/Phase1_MechanicalView/'),
     RunOnEndLumi = cms.bool(True),
     RunOnEndJob = cms.bool(True),
+    ApplyTrigger = cms.bool(True),
     SummaryMaps = cms.VPSet(
         cms.PSet(
             MapName = cms.string("Digi"),
@@ -37,6 +38,7 @@ SiPixelPhase1Summary_Offline = DQMEDHarvester("SiPixelPhase1Summary",
     TopFolderName = cms.string('PixelPhase1/Phase1_MechanicalView/'),
     RunOnEndLumi = cms.bool(False),
     RunOnEndJob = cms.bool(True),
+    ApplyTrigger = cms.bool(True),
     SummaryMaps = cms.VPSet(
         cms.PSet(
             MapName = cms.string("Digi"),
@@ -65,6 +67,7 @@ SiPixelPhase1Summary_Cosmics = DQMEDHarvester("SiPixelPhase1Summary",
     TopFolderName = cms.string('PixelPhase1/Phase1_MechanicalView/'),
     RunOnEndLumi = cms.bool(False),
     RunOnEndJob = cms.bool(True),
+    ApplyTrigger = cms.bool(True),
     SummaryMaps = cms.VPSet(
         cms.PSet(
             MapName = cms.string("Digi"),
